@@ -12,8 +12,8 @@ metadata:
   annotations:
     "helm.sh/hook": post-install
     "helm.sh/hook-weight": "0"
-    # keep job on failure for debugging; clean up before next install and after success
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    # keep job around after success so kubectl wait and log inspection still work
+    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   backoffLimit: 2
   template:

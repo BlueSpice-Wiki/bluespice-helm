@@ -1,4 +1,13 @@
-# Local development overrides — do NOT commit passwords to version control
+# Local development overrides — replace the password placeholders before install
+
+global:
+  imagePullPolicy: IfNotPresent
+  image:
+    repository: bluespice
+    backendrepo: bluespice
+    helperName: helper
+    wikiTag: "5.2"
+    backendTag: "5.2"
 
 # minikube only supports ReadWriteOnce; combine wiki-web + wiki-task in one pod to share the PVC
 wikiServicesCombineWebAndTask: true
@@ -6,16 +15,51 @@ wikiServicesVolume:
   wiki-pvc:
     storageClassName: "standard"
     accessModes: ["ReadWriteOnce"]
+    resources:
+      requests:
+        storage: "5Gi"
 
 wikiEnv:
   configEnv:
-    WIKI_INITIAL_ADMIN_PASS: "bluespice-admin"
+    EDITION: "free"
+    WIKI_NAME: "BlueSpice Local"
+    WIKI_LANG: "en"
+    WIKI_HOST: "wiki.local"
+    WIKI_PORT: "80"
+    WIKI_PROTOCOL: "http"
+    DB_USER: "bluespice"
+    DB_HOST: "database"
+    DB_NAME: "bluespice"
+    DB_PREFIX: ""
+    WIKI_INITIAL_ADMIN_USER: "Admin"
+    WIKI_INITIAL_ADMIN_PASS: ""  # replace with a local password before install
+  extraEnvFrom:
+    - secretRef:
+        name: internal-wiki-secrets
+
+statelessbackendServices:
+  wire:
+    configEnv:
+      WIRE_WIKI_BASE_PATH: "http://wiki-web"
+      WIRE_LOG_LEVEL: ""
+    extraEnv:
+      - name: WIRE_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: internal-wiki-secrets
+            key: INTERNAL_WIRE_API_KEY
+      - name: WIRE_TOKEN_SALT
+        valueFrom:
+          secretKeyRef:
+            name: internal-wiki-secrets
+            key: INTERNAL_WIKI_TOKEN_AUTH_SALT
 
 statefulBackendServices:
   database:
+    enabled: true
     secrets:
-      MARIADB_ROOT_PASSWORD: "root-local"
-      MARIADB_PASSWORD: "bluespice-local"
+      MARIADB_ROOT_PASSWORD: ""  # replace with a local password before install
+      MARIADB_PASSWORD: ""       # replace with a local password before install
     volumes:
       - path: /var/lib/mysql
         claim: database-data-pvc
@@ -32,6 +76,7 @@ statefulBackendServices:
           requests:
             storage: "1Gi"
   collabpadsDatabase:
+    enabled: true
     volumes:
       - path: /data/db
         claim: collabpads-pvc
@@ -40,3 +85,5 @@ statefulBackendServices:
         resources:
           requests:
             storage: "2Gi"
+  search:
+    enabled: false

@@ -26,6 +26,9 @@ Helm chart for containerized deployment of [BlueSpice Wiki](https://bluespice.co
 > Depending on your Kubernetes platform and storage/network stack, additional adjustments may be required.
 > Check [Platform-Specific Notes](#platform-specific-notes) before installing.
 
+> [!NOTE]
+> `helm/values-local.yaml` is the local template for Minikube. It keeps the non-sensitive defaults, but you still need to replace the password placeholders before install or override them with `--set`.
+
 ```bash
 # 1. Create namespace
 kubectl create namespace bluespice
@@ -48,7 +51,21 @@ To disable the install Job (e.g. when restoring from backup):
 helm install bluespice ./helm -n bluespice -f ./helm/values-local.yaml --set installation.enabled=false
 ```
 
+### Local secrets for minikube
+
+Replace the placeholders in `helm/values-local.yaml` before install:
+
+- `wikiEnv.configEnv.WIKI_INITIAL_ADMIN_PASS`
+- `statefulBackendServices.database.secrets.MARIADB_ROOT_PASSWORD`
+- `statefulBackendServices.database.secrets.MARIADB_PASSWORD`
+
+The file already includes the other Minikube-local defaults such as `global.image.*`, `wikiEnv.configEnv.EDITION`, `wikiServicesCombineWebAndTask`, `wikiEnv.extraEnvFrom`, and the `wire` env wiring.
+
+Or override the placeholders at install time with `--set`.
+
 ## Platform-Specific Notes
+
+The following sections are based on the stack we tested in Minikube. Other platforms are marked as untested and may need additional adjustment.
 
 ### Minikube
 
@@ -56,19 +73,19 @@ helm install bluespice ./helm -n bluespice -f ./helm/values-local.yaml --set ins
 - Minikube usually provides `ReadWriteOnce` only, while the chart default for `wiki-pvc` is `ReadWriteMany`.
 - Keep `wikiServicesCombineWebAndTask: true` for local RWO storage.
 
-### kind
+### kind (untested)
 
 - `kind` local-path storage is typically `ReadWriteOnce`.
 - Use the same approach as minikube (`wikiServicesCombineWebAndTask: true`, `ReadWriteOnce`).
 - Set `wikiServicesVolume.wiki-pvc.storageClassName` to your actual class (often `standard` or `local-path`).
 
-### Managed Kubernetes (EKS/GKE/AKS)
+### Managed Kubernetes (EKS/GKE/AKS) (untested)
 
 - Verify whether your StorageClass supports `ReadWriteMany`.
 - If RWX is unavailable, switch to RWO + `wikiServicesCombineWebAndTask: true`.
 - Review ingress class and annotations (`ingress.ingressClassName`, `ingress.ingressAnnotations`) for your controller.
 
-### OpenShift
+### OpenShift (untested)
 
 - Review pod security settings (`global.podSecurityContext`, `global.containerSecurityContext`).
 - You may need to set `fsGroup` depending on your SCC and storage setup.
@@ -169,54 +186,7 @@ wikiEnv:
 
 ## Local Development
 
-For local development with **minikube** (which only supports `ReadWriteOnce` storage):
-
-```bash
-minikube start --cpus=4 --memory=6g
-```
-
-`helm/values-local.yaml`:
-```yaml
-wikiServicesCombineWebAndTask: true   # required for RWO storage
-wikiServicesVolume:
-  wiki-pvc:
-    storageClassName: "standard"
-    accessModes: ["ReadWriteOnce"]
-
-wikiEnv:
-  configEnv:
-    WIKI_INITIAL_ADMIN_PASS: "your-admin-password"
-
-statefulBackendServices:
-  database:
-    secrets:
-      MARIADB_ROOT_PASSWORD: "your-root-password"
-      MARIADB_PASSWORD: "your-wiki-password"
-    volumes:
-      - path: /var/lib/mysql
-        claim: database-data-pvc
-        storageClassName: "standard"
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: "5Gi"
-      - path: /var/log/mysql
-        claim: database-logs-pvc
-        storageClassName: "standard"
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: "1Gi"
-  collabpadsDatabase:
-    volumes:
-      - path: /data/db
-        claim: collabpads-pvc
-        storageClassName: "standard"
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: "2Gi"
-```
+For local development, use the [Minikube notes](#minikube) in [Platform-Specific Notes](#platform-specific-notes) together with `helm/values-local.yaml`.
 
 ## Upgrade
 
