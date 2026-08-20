@@ -15,14 +15,19 @@ global:
     type: ClusterIP
     port: 80
   image:
-    repository:    # shared base repo for wiki and backend
-    backendrepo: 
-    wikiTag: "5.2"                                  # defaults to chart appVersion when empty
-    backendTag: "5.2"                               # defaults to chart appVersion when empty
+    repository: bluespice   # Docker Hub; override for private registry
+    backendrepo: bluespice  # Docker Hub; override for private registry
+    helperName: "helper"    # public Docker Hub image name (private registries use k8s-helper)
+    wikiTag: "5.2"          # defaults to chart appVersion when empty
+    backendTag: "5.2"       # defaults to chart appVersion when empty
 
 # AI service settings (future use)
 ai:
   enabled: false
+
+# Set to false to skip the post-install DB initialisation Job (e.g. when restoring from backup)
+installation:
+  enabled: true
 
 #if needed change tls secret and add annottations.
 ingress:
@@ -68,6 +73,7 @@ wikiServices:
       - path: /data
         name: wiki
         claim: wiki-pvc   # set to existing PVC name; falls back to <name>-pvc if omitted
+        subPath: wiki     # init-container writes into wiki/ subdirectory on the PVC
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -94,6 +100,7 @@ wikiServices:
       - path: /data
         name: wiki
         claim: wiki-pvc
+        subPath: wiki
     nodeSelector: {}
     tolerations: []
     affinity: {}
@@ -103,17 +110,19 @@ wikiEnv:
   # Updated env variables to be passed to wiki deployment.
   configEnv:
     VERSION: ""
-    EDITION: ""
-    WIKI_NAME: ""
-    WIKI_LANG: ""
+    EDITION: "free"         # free = Docker Hub images; pro = private registry
+    WIKI_NAME: "BlueSpice"
+    WIKI_LANG: "en"
     WIKI_PASSWORDSENDER: 
     WIKI_EMERGENCYCONTACT: 
-    WIKI_HOST: ""
-    WIKI_PORT: ""
-    WIKI_PROTOCOL: ""
-    DB_USER: ""
-    DB_HOST: ""
-    DB_NAME: ""
+    WIKI_HOST: "localhost"  # set to your domain in production
+    WIKI_PORT: "80"
+    WIKI_PROTOCOL: "http"
+    WIKI_INITIAL_ADMIN_USER: "Admin"
+    WIKI_INITIAL_ADMIN_PASS: ""  # leave empty to auto-generate; read from /data/initialAdminPassword
+    DB_USER: "bluespice"
+    DB_HOST: "database"
+    DB_NAME: "bluespice"
     DB_PREFIX: ""
     SMTP_HOST: ""
     SMTP_PORT: ""
@@ -141,10 +150,10 @@ wikiEnv:
 wikiServicesVolume:
   wiki-pvc:
     storageClassName: ""
-    accessModes: ["ReadWriteMany"]
+    accessModes: ["ReadWriteMany"]  # use ReadWriteOnce + wikiServicesCombineWebAndTask: true if RWX unavailable
     resources:
       requests:
-        storage: ""
+        storage: "5Gi"
 
 
 # Value overrides for stateless backend services. Update k8s specific configs if required.
@@ -295,7 +304,7 @@ statefulBackendServices:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: ""
+            storage: "2Gi"
   search:
     enabled: false
     name: search
@@ -342,4 +351,4 @@ statefulBackendServices:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: ""
+            storage: "1Gi"

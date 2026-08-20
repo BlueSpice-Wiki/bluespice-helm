@@ -44,7 +44,8 @@ spec:
         - name: prepare-bluespice
           {{- $backendRepo := default "docker.bluespice.com/bluespice" $.Values.global.image.backendrepo }}
           {{- $backendTag := default $.Chart.AppVersion $.Values.global.image.backendTag }}
-          image: {{ printf "%s/k8s-helper:%s" $backendRepo $backendTag }}
+          {{- $helperName := default "k8s-helper" $.Values.global.image.helperName }}
+          image: {{ printf "%s/%s:%s" $backendRepo $helperName $backendTag }}
           imagePullPolicy: {{ default "IfNotPresent" $.Values.global.imagePullPolicy }}
           command: ["/app/bin/prepare-bluespice"]
           envFrom:
@@ -139,6 +140,9 @@ spec:
         {{- range $vol := $value.volumes }}
         - name: {{ $vol.name }}
           mountPath: {{ $vol.path }}
+          {{- if $vol.subPath }}
+          subPath: {{ $vol.subPath }}
+          {{- end }}
         {{- end }}
         {{- end }}
       {{- if and $combineWebTask (eq $key "wiki-web") }}
@@ -211,6 +215,9 @@ spec:
         {{- range $vol := $wikiTask.volumes }}
         - name: {{ $vol.name }}
           mountPath: {{ $vol.path }}
+          {{- if $vol.subPath }}
+          subPath: {{ $vol.subPath }}
+          {{- end }}
         {{- end }}
         {{- end }}
       {{- end }}

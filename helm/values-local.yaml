@@ -1,0 +1,42 @@
+# Local development overrides — do NOT commit passwords to version control
+
+# minikube only supports ReadWriteOnce; combine wiki-web + wiki-task in one pod to share the PVC
+wikiServicesCombineWebAndTask: true
+wikiServicesVolume:
+  wiki-pvc:
+    storageClassName: "standard"
+    accessModes: ["ReadWriteOnce"]
+
+wikiEnv:
+  configEnv:
+    WIKI_INITIAL_ADMIN_PASS: "bluespice-admin"
+
+statefulBackendServices:
+  database:
+    secrets:
+      MARIADB_ROOT_PASSWORD: "root-local"
+      MARIADB_PASSWORD: "bluespice-local"
+    volumes:
+      - path: /var/lib/mysql
+        claim: database-data-pvc
+        storageClassName: "standard"
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: "5Gi"
+      - path: /var/log/mysql
+        claim: database-logs-pvc
+        storageClassName: "standard"
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: "1Gi"
+  collabpadsDatabase:
+    volumes:
+      - path: /data/db
+        claim: collabpads-pvc
+        storageClassName: "standard"
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: "2Gi"

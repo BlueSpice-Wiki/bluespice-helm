@@ -1,0 +1,66 @@
+{{- if .Values.installation.enabled }}
+{{- $statefulDbEnabled := and .Values.statefulBackendServices .Values.statefulBackendServices.database .Values.statefulBackendServices.database.enabled }}
+{{- $baseRepo := default "docker.bluespice.com/bluespice" .Values.global.image.repository }}
+{{- $wikiTag := default .Chart.AppVersion .Values.global.image.wikiTag }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "bluespice.fullname" . }}-install
+  namespace: {{ default "default" .Release.Namespace }}
+  labels:
+    {{- include "bluespice.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "0"
+    # keep job on failure for debugging; clean up before next install and after success
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: OnFailure
+      enableServiceLinks: false
+      {{- with .Values.global.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- if $statefulDbEnabled }}
+        - name: wait-for-db
+          image: busybox
+          command: ['sh', '-c', 'until nc -z {{ default "database" .Values.statefulBackendServices.database.name }} {{ default 3306 .Values.statefulBackendServices.database.port }}; do echo waiting for database; sleep 5; done;']
+        {{- end }}
+      containers:
+        - name: run-installation
+          image: {{ printf "%s/wiki:%s" $baseRepo $wikiTag }}
+          imagePullPolicy: {{ default "IfNotPresent" .Values.global.imagePullPolicy }}
+          command: ["/app/bin/run-installation"]
+          envFrom:
+            - configMapRef:
+                name: {{ include "bluespice.fullname" . }}-wiki-config
+            {{- if .Values.wikiEnv.extraEnvFrom }}
+            {{- toYaml .Values.wikiEnv.extraEnvFrom | nindent 12 }}
+            {{- end }}
+          env:
+            {{- if $statefulDbEnabled }}
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: bluespice-database-secrets
+                  key: MARIADB_PASSWORD
+            {{- else if or .Values.wikiEnv.secretEnv.DB_PASS .Values.wikiEnv.existingSecret.name }}
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-wiki-secrets" (include "bluespice.fullname" .)) .Values.wikiEnv.existingSecret.name }}
+                  key: {{ default "DB_PASS" .Values.wikiEnv.existingSecret.dbKey }}
+            {{- end }}
+          volumeMounts:
+            - name: wiki
+              mountPath: /data
+              subPath: wiki
+      volumes:
+        - name: wiki
+          persistentVolumeClaim:
+            claimName: wiki-pvc
+{{- end }}
