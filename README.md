@@ -61,7 +61,24 @@ Replace the placeholders in `helm/values-local.yaml` before install:
 
 The file already includes the other Minikube-local defaults such as `global.image.*`, `wikiEnv.configEnv.EDITION`, `wikiServicesCombineWebAndTask`, `wikiEnv.extraEnvFrom`, and the `wire` env wiring.
 
-Or override the placeholders at install time with `--set`.
+Or keep `helm/values-local.yaml` unchanged and override the placeholders at install time with `--set-string`:
+
+```bash
+helm install bluespice ./helm -n bluespice \
+  -f ./helm/values-local.yaml \
+  --set-string wikiEnv.configEnv.WIKI_INITIAL_ADMIN_PASS='your-admin-password' \
+  --set-string statefulBackendServices.database.secrets.MARIADB_ROOT_PASSWORD='your-root-password' \
+  --set-string statefulBackendServices.database.secrets.MARIADB_PASSWORD='your-wiki-password'
+```
+
+For the initial login, use the admin user from `wikiEnv.configEnv.WIKI_INITIAL_ADMIN_USER`.
+By default that is `Admin`. The password is either the value you set in `WIKI_INITIAL_ADMIN_PASS` or the generated one stored at `/data/initialAdminPassword` after install:
+
+```bash
+kubectl exec -n bluespice deployment/wiki-web -c wiki-web -- cat /data/initialAdminPassword
+```
+
+When you access the wiki through `kubectl port-forward`, keep `WIKI_HOST` on `localhost` and `WIKI_PORT` on `8080` in `helm/values-local.yaml`. A hostname like `wiki.local` or a mismatching public port will make the login redirect point to an unreachable URL on your machine.
 
 ## Platform-Specific Notes
 
