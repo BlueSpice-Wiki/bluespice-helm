@@ -4,6 +4,16 @@
 
 Helm chart for containerized deployment of [BlueSpice Wiki](https://bluespice.com) on Kubernetes.
 
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Platform-Specific Notes](#platform-specific-notes)
+- [Configuration](#configuration)
+- [Local Development](#local-development)
+- [Upgrade](#upgrade)
+- [Further Documentation](#further-documentation)
+
 ## Prerequisites
 
 - Kubernetes 1.25+
@@ -11,6 +21,10 @@ Helm chart for containerized deployment of [BlueSpice Wiki](https://bluespice.co
 - A StorageClass that supports `ReadWriteMany` (RWX) for the wiki PVC — or use `wikiServicesCombineWebAndTask: true` with `ReadWriteOnce` (see [Local Development](#local-development))
 
 ## Installation
+
+> [!WARNING]
+> Depending on your Kubernetes platform and storage/network stack, additional adjustments may be required.
+> Check [Platform-Specific Notes](#platform-specific-notes) before installing.
 
 ```bash
 # 1. Create namespace
@@ -33,6 +47,31 @@ To disable the install Job (e.g. when restoring from backup):
 ```bash
 helm install bluespice ./helm -n bluespice -f ./helm/values-local.yaml --set installation.enabled=false
 ```
+
+## Platform-Specific Notes
+
+### Minikube
+
+- Use `helm/values-local.yaml`.
+- Minikube usually provides `ReadWriteOnce` only, while the chart default for `wiki-pvc` is `ReadWriteMany`.
+- Keep `wikiServicesCombineWebAndTask: true` for local RWO storage.
+
+### kind
+
+- `kind` local-path storage is typically `ReadWriteOnce`.
+- Use the same approach as minikube (`wikiServicesCombineWebAndTask: true`, `ReadWriteOnce`).
+- Set `wikiServicesVolume.wiki-pvc.storageClassName` to your actual class (often `standard` or `local-path`).
+
+### Managed Kubernetes (EKS/GKE/AKS)
+
+- Verify whether your StorageClass supports `ReadWriteMany`.
+- If RWX is unavailable, switch to RWO + `wikiServicesCombineWebAndTask: true`.
+- Review ingress class and annotations (`ingress.ingressClassName`, `ingress.ingressAnnotations`) for your controller.
+
+### OpenShift
+
+- Review pod security settings (`global.podSecurityContext`, `global.containerSecurityContext`).
+- You may need to set `fsGroup` depending on your SCC and storage setup.
 
 ## Configuration
 
