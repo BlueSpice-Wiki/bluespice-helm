@@ -44,6 +44,9 @@ kubectl port-forward -n bluespice svc/wiki-web 8080:80
 # → http://localhost:8080
 ```
 
+> [!NOTE]
+> Wait a few seconds after the port-forward starts before opening the URL. PHP-FPM inside the pod may still be initializing and will return HTTP 503 briefly.
+
 The post-install Job runs `/app/bin/run-installation` automatically and sets up the database schema. On subsequent `helm upgrade` calls the Job does not run again.
 
 To disable the install Job (e.g. when restoring from backup):
@@ -58,6 +61,9 @@ Replace the placeholders in `helm/values-local.yaml` before install:
 - `wikiEnv.configEnv.WIKI_INITIAL_ADMIN_PASS`
 - `statefulBackendServices.database.secrets.MARIADB_ROOT_PASSWORD`
 - `statefulBackendServices.database.secrets.MARIADB_PASSWORD`
+
+> [!IMPORTANT]
+> All three passwords must be **at least 10 characters** long. MediaWiki enforces this for the admin password, and using shorter values causes the install Job to silently skip database setup — the Job will still report success, but the wiki will be non-functional.
 
 The file already includes the other Minikube-local defaults such as `global.image.*`, `wikiEnv.configEnv.EDITION`, `wikiServicesCombineWebAndTask`, `wikiEnv.extraEnvFrom`, and the `wire` env wiring.
 

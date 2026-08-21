@@ -32,7 +32,7 @@ wikiEnv:
     DB_NAME: "bluespice"
     DB_PREFIX: ""
     WIKI_INITIAL_ADMIN_USER: "Admin"
-    WIKI_INITIAL_ADMIN_PASS: ""  # replace with a local password before install
+    WIKI_INITIAL_ADMIN_PASS: "pw123123123"  # replace before install — min. 10 characters required
   extraEnvFrom:
     - secretRef:
         name: internal-wiki-secrets
@@ -58,8 +58,8 @@ statefulBackendServices:
   database:
     enabled: true
     secrets:
-      MARIADB_ROOT_PASSWORD: ""  # replace with a local password before install
-      MARIADB_PASSWORD: ""       # replace with a local password before install
+      MARIADB_ROOT_PASSWORD: "pw123123123123"  # replace before install — min. 10 characters required
+      MARIADB_PASSWORD: "pw123123123123"       # replace before install — min. 10 characters required
     volumes:
       - path: /var/lib/mysql
         claim: database-data-pvc
