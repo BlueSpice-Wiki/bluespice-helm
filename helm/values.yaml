@@ -15,24 +15,14 @@ global:
     type: ClusterIP
     port: 80
   image:
-    repository: bluespice   # Docker Hub; override for private registry
-    backendrepo: bluespice  # Docker Hub; override for private registry
-    helperName: "helper"    # public Docker Hub image name (private registries use k8s-helper)
-    wikiTag: "5.2"          # defaults to chart appVersion when empty
-    backendTag: "5.2"       # defaults to chart appVersion when empty
-
-# AI service settings (future use)
-ai:
-  enabled: false
-
-# Set to false to skip the post-install DB initialisation Job (e.g. when restoring from backup)
-installation:
-  enabled: true
+    repository:    # shared base repo for wiki and backend
+    backendrepo: 
+    wikiTag: "5.1"                                  # defaults to chart appVersion when empty
+    backendTag: "5.1"                               # defaults to chart appVersion when empty
 
 #if needed change tls secret and add annottations.
 ingress:
     ingressAnnotations: {}
-    wireAnnotations: {}
     tls: true
     name: wiki-web
     tlsSecret: wiki-ingress-cert
@@ -73,7 +63,6 @@ wikiServices:
       - path: /data
         name: wiki
         claim: wiki-pvc   # set to existing PVC name; falls back to <name>-pvc if omitted
-        subPath: wiki     # init-container writes into wiki/ subdirectory on the PVC
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -100,7 +89,6 @@ wikiServices:
       - path: /data
         name: wiki
         claim: wiki-pvc
-        subPath: wiki
     nodeSelector: {}
     tolerations: []
     affinity: {}
@@ -110,19 +98,17 @@ wikiEnv:
   # Updated env variables to be passed to wiki deployment.
   configEnv:
     VERSION: ""
-    EDITION: "free"         # free = Docker Hub images; pro = private registry
-    WIKI_NAME: "BlueSpice"
-    WIKI_LANG: "en"
+    EDITION: ""
+    WIKI_NAME: ""
+    WIKI_LANG: ""
     WIKI_PASSWORDSENDER: 
     WIKI_EMERGENCYCONTACT: 
-    WIKI_HOST: "localhost"  # set to your domain in production
-    WIKI_PORT: "80"
-    WIKI_PROTOCOL: "http"
-    WIKI_INITIAL_ADMIN_USER: "Admin"
-    WIKI_INITIAL_ADMIN_PASS: ""  # leave empty to auto-generate; read from /data/initialAdminPassword
-    DB_USER: "bluespice"
-    DB_HOST: "database"
-    DB_NAME: "bluespice"
+    WIKI_HOST: ""
+    WIKI_PORT: ""
+    WIKI_PROTOCOL: ""
+    DB_USER: ""
+    DB_HOST: ""
+    DB_NAME: ""
     DB_PREFIX: ""
     SMTP_HOST: ""
     SMTP_PORT: ""
@@ -142,18 +128,15 @@ wikiEnv:
     name: ""        # if set, reuse this Secret and skip creation
     dbKey: DB_PASS
     searchKey: SEARCH_PASS
-  extraEnvFrom:
-    - secretRef:
-        name: internal-wiki-secrets
 
 # Update the storage class name and storage capacity of wiki pvc.
 wikiServicesVolume:
   wiki-pvc:
     storageClassName: ""
-    accessModes: ["ReadWriteMany"]  # use ReadWriteOnce + wikiServicesCombineWebAndTask: true if RWX unavailable
+    accessModes: ["ReadWriteMany"]
     resources:
       requests:
-        storage: "5Gi"
+        storage: ""
 
 
 # Value overrides for stateless backend services. Update k8s specific configs if required.
@@ -263,31 +246,6 @@ statelessbackendServices:
     existingSecret:
       name: ""          # reuse this Secret if set; skips creation
       passwordKey: COLLABPADS_BACKEND_MONGO_DB_PASSWORD
-  wire:
-    name: wire
-    replicas: 1
-    port: 3333
-    targetPort: 3333
-    configEnv:
-      WIRE_WIKI_BASE_PATH: "http://wiki-web"
-      WIRE_LOG_LEVEL: ""
-    extraEnv:
-      - name: WIRE_API_KEY
-        valueFrom:
-          secretKeyRef:
-            name: internal-wiki-secrets
-            key: INTERNAL_WIRE_API_KEY
-      - name: WIRE_TOKEN_SALT
-        valueFrom:
-          secretKeyRef:
-            name: internal-wiki-secrets
-            key: INTERNAL_WIKI_TOKEN_AUTH_SALT
-    livenessProbe: {}
-    readinessProbe: {}
-    resources: {}
-    nodeSelector: {}
-    tolerations: []
-    affinity: {}
 
 statefulBackendServices:
   collabpadsDatabase:
@@ -304,11 +262,11 @@ statefulBackendServices:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: "2Gi"
+            storage: ""
   search:
     enabled: false
     name: search
-    image: bluespice/search:5.2
+    image: bluespice/search:5.1
     port: 9200
     targetPort: 9200    
     podSecurityContext:
@@ -351,4 +309,4 @@ statefulBackendServices:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: "1Gi"
+            storage: ""

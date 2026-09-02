@@ -6,8 +6,8 @@ global:
     repository: bluespice
     backendrepo: bluespice
     helperName: helper
-    wikiTag: "5.2"
-    backendTag: "5.2"
+    wikiTag: "5.1"
+    backendTag: "5.1"
 
 # minikube only supports ReadWriteOnce; combine wiki-web + wiki-task in one pod to share the PVC
 wikiServicesCombineWebAndTask: true
@@ -37,22 +37,7 @@ wikiEnv:
     - secretRef:
         name: internal-wiki-secrets
 
-statelessbackendServices:
-  wire:
-    configEnv:
-      WIRE_WIKI_BASE_PATH: "http://wiki-web"
-      WIRE_LOG_LEVEL: ""
-    extraEnv:
-      - name: WIRE_API_KEY
-        valueFrom:
-          secretKeyRef:
-            name: internal-wiki-secrets
-            key: INTERNAL_WIRE_API_KEY
-      - name: WIRE_TOKEN_SALT
-        valueFrom:
-          secretKeyRef:
-            name: internal-wiki-secrets
-            key: INTERNAL_WIKI_TOKEN_AUTH_SALT
+
 
 statefulBackendServices:
   database:

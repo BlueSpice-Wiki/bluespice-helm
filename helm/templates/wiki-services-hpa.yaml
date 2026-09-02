@@ -13,10 +13,12 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ $wikiWeb.name }}
-  minReplicas: {{ default 1 $wikiWeb.hpa.minReplicas }}
-  maxReplicas: {{ default 3 $wikiWeb.hpa.maxReplicas }}
+  minReplicas: {{ $wikiWeb.hpa.minReplicas }}
+  maxReplicas: {{ $wikiWeb.hpa.maxReplicas }}
+  {{- with $wikiWeb.hpa.metrics }}
   metrics:
-    {{- toYaml $wikiWeb.hpa.metrics | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with $wikiWeb.hpa.behavior }}
   behavior:
     {{- toYaml . | nindent 4 }}

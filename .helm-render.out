@@ -1,0 +1,827 @@
+---
+# Source: bluespice/templates/wiki-services-internal-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: internal-wiki-secrets
+  namespace: bluespice
+  labels:
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+stringData:
+  INTERNAL_WIRE_API_KEY:                    "QCLBFFT0uDpHUQh03wAcj0HG73q9Y0B8cGxMU1AG3uuHyRcme0UDyhyNKO8NZIzJ"
+  INTERNAL_WIKI_TOKEN_AUTH_SALT:            "xkmZgnvvKsgqfToNkSudaSfV83nO2HWLCEpCTBQnhsPA1BGeidCaRs0u4PHlT6NI"
+  INTERNAL_WIKI_SECRETKEY:                  "arhSi38IlNZfINMdzuSKcZ8bGpKMX1zXqWgLUCp4mMT81wOMWtVMzMKZBWKYtVm4"
+  INTERNAL_WIKI_UPGRADEKEY:                 "B0CtiQItkxHSYxOA"
+  INTERNAL_SIMPLESAMLPHP_ADMIN_PASS:        "tTQlrKLCDGaw3Rll"
+  INTERNAL_SIMPLESAMLPHP_SECRET_SALT:       "96u9FuamvT7OvKOFKfHb7zvtmeV6OBo5nprmUf7Zpj4EOnzUze0svdGC2QRJELLv"
+  INTERNAL_SIMPLESAMLPHP_SESSION_API_TOKEN: "1h1iMmrSnNCp7oQRzbP5f2IV8wTFxZyOB9pd46nkxWNhKN2hLEoxgCfQ4BoEXOX6"
+  INTERNAL_CHAT_TOKEN:                      "NyKN7yJrgCJo90r1CfHws0jM281DzDRN01IRuuZVsOEDIupidlooO0sHuxJW9f65"
+  INTERNAL_CHAT_WIKI_ACCESS_TOKEN:          "VNKYOn4SGOAK2inkBwVZ3TjTQoc5BTP9vX6mWiwvaslOzXOJCv5M9BSMHgCUK7LI"
+  CHAT_AI_CHAT_SERVICE_API_KEY:             "PbJ8v3s6QuYm6Nz8H5E12673AMYZnDLCE7pXip72daVhkFC2NU2WhiNNy7dLmXWV"
+---
+# Source: bluespice/templates/wiki-stateful-backend-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bluespice-database-secrets
+  namespace: bluespice
+  labels:
+    app: bluespice
+type: Opaque
+data:
+  MARIADB_ROOT_PASSWORD: "cHcxMjMxMjMxMjMxMjM="
+  MARIADB_PASSWORD: "cHcxMjMxMjMxMjMxMjM="
+---
+# Source: bluespice/templates/wiki-services-env-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bluespice-wiki-config
+  namespace: bluespice
+  labels:
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+data:
+  VERSION: ""
+  EDITION: "free"
+  WIKI_NAME: "BlueSpice Local"
+  WIKI_LANG: "en"
+  WIKI_PASSWORDSENDER: ""
+  WIKI_EMERGENCYCONTACT: ""
+  WIKI_HOST: "localhost"
+  WIKI_PORT: "8080"
+  WIKI_PROTOCOL: "http"
+  WIKI_INITIAL_ADMIN_PASS: "pw123123123"
+  WIKI_INITIAL_ADMIN_USER: "Admin"
+  WIKI_SUBSCRIPTION_KEY: ""
+  DB_USER: "bluespice"
+  DB_HOST: "database"
+  DB_NAME: "bluespice"
+  DB_PREFIX: ""
+  SMTP_HOST: ""
+  SMTP_PORT: ""
+  SMTP_USER: ""
+  SMTP_PASS: ""
+  SMTP_ID_HOST: ""
+  SEARCH_HOST: ""
+  SEARCH_PORT: ""
+  SEARCH_PROTOCOL: ""
+  SEARCH_USER: ""
+---
+# Source: bluespice/templates/wiki-stateless-backend-env.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bluespice-collabpads-config
+  namespace: bluespice
+  labels:
+    app: collabpads
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+data:
+  COLLABPADS_BACKEND_LOG_LEVEL: "error"
+  COLLABPADS_BACKEND_MONGO_DB_HOST: "collabpads-database"
+  COLLABPADS_BACKEND_MONGO_DB_NAME: "collabpads"
+  COLLABPADS_BACKEND_MONGO_DB_PORT: "27017"
+  COLLABPADS_BACKEND_MONGO_DB_USER: ""
+  COLLABPADS_BACKEND_PORT: "8080"
+  COLLABPADS_BACKEND_WIKI_BASEURL: "http://wiki-web"
+---
+# Source: bluespice/templates/wiki-stateless-backend-env.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bluespice-wire-config
+  namespace: bluespice
+  labels:
+    app: wire
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+data:
+  WIRE_LOG_LEVEL: ""
+  WIRE_WIKI_BASE_PATH: "http://wiki-web"
+---
+# Source: bluespice/templates/wiki-services-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wiki-pvc
+  namespace: bluespice
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+# Source: bluespice/templates/wiki-stateful-backend-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: collabpads-pvc
+  namespace: bluespice
+spec:
+  storageClassName: standard
+  accessModes:
+      - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+# Source: bluespice/templates/wiki-stateful-backend-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-data-pvc
+  namespace: bluespice
+spec:
+  storageClassName: standard
+  accessModes:
+      - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+# Source: bluespice/templates/wiki-stateful-backend-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-logs-pvc
+  namespace: bluespice
+spec:
+  storageClassName: standard
+  accessModes:
+      - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Source: bluespice/templates/wiki-services-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: wiki-web
+  namespace: bluespice
+  labels:
+    app: wiki-web
+spec:
+  type: ClusterIP
+  selector:
+    app: wiki-web
+  ports:
+    - port: 80
+      targetPort: 9090
+      protocol: TCP
+      name: http
+---
+# Source: bluespice/templates/wiki-stateful-backend-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: collabpads-database
+  namespace: bluespice
+  labels:
+    app: collabpads-database
+spec:
+  type: ClusterIP
+  selector:
+    app: collabpads-database
+  ports:
+  - port: 27017
+    targetPort: 27017
+    protocol: TCP
+    name: http
+---
+# Source: bluespice/templates/wiki-stateful-backend-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: database
+  namespace: bluespice
+  labels:
+    app: database
+spec:
+  type: ClusterIP
+  selector:
+    app: database
+  ports:
+  - port: 3306
+    targetPort: 3306
+    protocol: TCP
+    name: http
+---
+# Source: bluespice/templates/wiki-stateless-backend-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: cache
+  namespace: bluespice
+  labels:
+    app: cache
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  selector:
+    app: cache
+  ports:
+    - port: 11211
+      targetPort: 11211
+      protocol: TCP
+      name: http
+---
+# Source: bluespice/templates/wiki-stateless-backend-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: collabpads
+  namespace: bluespice
+  labels:
+    app: collabpads
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  selector:
+    app: collabpads
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+---
+# Source: bluespice/templates/wiki-stateless-backend-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: diagram
+  namespace: bluespice
+  labels:
+    app: diagram
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  selector:
+    app: diagram
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+---
+# Source: bluespice/templates/wiki-stateless-backend-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: formula
+  namespace: bluespice
+  labels:
+    app: formula
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  selector:
+    app: formula
+  ports:
+    - port: 10044
+      targetPort: 10044
+      protocol: TCP
+      name: http
+---
+# Source: bluespice/templates/wiki-stateless-backend-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: pdf
+  namespace: bluespice
+  labels:
+    app: pdf
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  selector:
+    app: pdf
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+---
+# Source: bluespice/templates/wiki-stateless-backend-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: wire
+  namespace: bluespice
+  labels:
+    app: wire
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  selector:
+    app: wire
+  ports:
+    - port: 3333
+      targetPort: 3333
+      protocol: TCP
+      name: http
+---
+# Source: bluespice/templates/wiki-services-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wiki-web
+  namespace: bluespice
+  labels:
+    app: wiki-web
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wiki-web
+  template:
+    metadata:
+      labels:
+        app: wiki-web
+        app.kubernetes.io/name: bluespice
+        app.kubernetes.io/instance: bluespice
+    spec:
+      enableServiceLinks: false
+      initContainers:
+        - name: wait-for-db
+          image: busybox
+          command: ['sh', '-c', 'until nc -z database 3306; do echo waiting for database; sleep 5; done;']
+      containers:
+      - name: wiki-web
+        image: bluespice/wiki:5.2
+        imagePullPolicy: IfNotPresent
+        args:
+          - start-web
+        envFrom:
+          - configMapRef:
+              name: bluespice-wiki-config
+        env:
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: bluespice-database-secrets
+                key: MARIADB_PASSWORD
+        ports:
+          - name: http 
+            containerPort: 9090
+            protocol: TCP
+        volumeMounts:
+        - name: wiki
+          mountPath: /data
+      - name: wiki-task
+        image: bluespice/wiki:5.2
+        imagePullPolicy: IfNotPresent
+        args:
+          - start-task --runAll
+        envFrom:
+          - configMapRef:
+              name: bluespice-wiki-config
+        env:
+          - name: BACKUP_HOUR
+            value: "02"
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: bluespice-database-secrets
+                key: MARIADB_PASSWORD
+        volumeMounts:
+        - name: wiki
+          mountPath: /data
+      volumes:
+      - name: wiki
+        persistentVolumeClaim:
+          claimName: wiki-pvc
+---
+# Source: bluespice/templates/wiki-stateful-backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collabpads-database
+  namespace: bluespice
+  labels:
+    app: collabpads-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: collabpads-database
+  template:
+    metadata:
+      labels:
+        app: collabpads-database
+    spec:
+      containers:
+      - name: collabpads-database
+        image: "mongo:8.2"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: collabpads-pvc
+          mountPath: /data/db
+      volumes:
+      - name: collabpads-pvc
+        persistentVolumeClaim:
+          claimName: collabpads-pvc
+---
+# Source: bluespice/templates/wiki-stateful-backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+  namespace: bluespice
+  labels:
+    app: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - name: database
+        image: "mariadb:10.5"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3306
+        env:
+          - name: MARIADB_DATABASE
+            value: bluespice
+          - name: MARIADB_USER
+            value: bluespice
+        envFrom:
+        - secretRef:
+            name: bluespice-database-secrets
+        volumeMounts:
+        - name: database-data-pvc
+          mountPath: /var/lib/mysql
+        - name: database-logs-pvc
+          mountPath: /var/log/mysql
+      volumes:
+      - name: database-data-pvc
+        persistentVolumeClaim:
+          claimName: database-data-pvc
+      - name: database-logs-pvc
+        persistentVolumeClaim:
+          claimName: database-logs-pvc
+---
+# Source: bluespice/templates/wiki-stateless-backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  namespace: bluespice
+  labels:
+    app: cache
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+        app.kubernetes.io/name: bluespice
+        app.kubernetes.io/instance: bluespice
+    spec:
+      enableServiceLinks: false
+      containers:
+      - name: cache
+        image: bluespice/cache:5.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 11211
+---
+# Source: bluespice/templates/wiki-stateless-backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collabpads
+  namespace: bluespice
+  labels:
+    app: collabpads
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: collabpads
+  template:
+    metadata:
+      labels:
+        app: collabpads
+        app.kubernetes.io/name: bluespice
+        app.kubernetes.io/instance: bluespice
+    spec:
+      enableServiceLinks: false
+      containers:
+      - name: collabpads
+        image: bluespice/collabpads:5.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        envFrom:
+          - configMapRef:
+              name: bluespice-collabpads-config
+---
+# Source: bluespice/templates/wiki-stateless-backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: diagram
+  namespace: bluespice
+  labels:
+    app: diagram
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: diagram
+  template:
+    metadata:
+      labels:
+        app: diagram
+        app.kubernetes.io/name: bluespice
+        app.kubernetes.io/instance: bluespice
+    spec:
+      enableServiceLinks: false
+      containers:
+      - name: diagram
+        image: bluespice/diagram:5.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+---
+# Source: bluespice/templates/wiki-stateless-backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: formula
+  namespace: bluespice
+  labels:
+    app: formula
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: formula
+  template:
+    metadata:
+      labels:
+        app: formula
+        app.kubernetes.io/name: bluespice
+        app.kubernetes.io/instance: bluespice
+    spec:
+      enableServiceLinks: false
+      containers:
+      - name: formula
+        image: bluespice/formula:5.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 10044
+---
+# Source: bluespice/templates/wiki-stateless-backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pdf
+  namespace: bluespice
+  labels:
+    app: pdf
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pdf
+  template:
+    metadata:
+      labels:
+        app: pdf
+        app.kubernetes.io/name: bluespice
+        app.kubernetes.io/instance: bluespice
+    spec:
+      enableServiceLinks: false
+      containers:
+      - name: pdf
+        image: bluespice/pdf:5.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+---
+# Source: bluespice/templates/wiki-stateless-backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wire
+  namespace: bluespice
+  labels:
+    app: wire
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wire
+  template:
+    metadata:
+      labels:
+        app: wire
+        app.kubernetes.io/name: bluespice
+        app.kubernetes.io/instance: bluespice
+    spec:
+      enableServiceLinks: false
+      containers:
+      - name: wire
+        image: bluespice/wire:5.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3333
+        envFrom:
+          - configMapRef:
+              name: bluespice-wire-config
+        env:
+          - name: WIRE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                key: INTERNAL_WIRE_API_KEY
+                name: internal-wiki-secrets
+          - name: WIRE_TOKEN_SALT
+            valueFrom:
+              secretKeyRef:
+                key: INTERNAL_WIKI_TOKEN_AUTH_SALT
+                name: internal-wiki-secrets
+---
+# Source: bluespice/templates/wiki-services-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bluespice
+  namespace: bluespice
+  labels:
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  rules:
+  - host: localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: wiki-web
+            port:
+              name: http
+      - path: /_collabpads
+        pathType: Prefix
+        backend:
+          service:
+            name: collabpads
+            port:
+              name: http
+      - path: /_diagram
+        pathType: Prefix
+        backend:
+          service:
+            name: diagram
+            port:
+              name: http
+  tls:
+  - hosts:
+    - localhost
+    secretName: wiki-ingress-cert
+---
+# Source: bluespice/templates/wiki-install-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: bluespice-install
+  namespace: bluespice
+  labels:
+    helm.sh/chart: bluespice-1.0.0
+    app.kubernetes.io/name: bluespice
+    app.kubernetes.io/instance: bluespice
+    app.kubernetes.io/version: "5.1"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "0"
+    # keep job around after success so kubectl wait and log inspection still work
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: OnFailure
+      enableServiceLinks: false
+      initContainers:
+        - name: wait-for-db
+          image: busybox
+          command: ['sh', '-c', 'until nc -z database 3306; do echo waiting for database; sleep 5; done;']
+      containers:
+        - name: run-installation
+          image: bluespice/wiki:5.2
+          imagePullPolicy: IfNotPresent
+          command: ["/app/bin/run-installation"]
+          envFrom:
+            - configMapRef:
+                name: bluespice-wiki-config
+            - secretRef:
+                name: internal-wiki-secrets
+          env:
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: bluespice-database-secrets
+                  key: MARIADB_PASSWORD
+          volumeMounts:
+            - name: wiki
+              mountPath: /data
+              subPath: wiki
+      volumes:
+        - name: wiki
+          persistentVolumeClaim:
+            claimName: wiki-pvc

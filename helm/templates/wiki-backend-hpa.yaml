@@ -13,10 +13,12 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ $value.name }}
-  minReplicas: {{ default 1 $value.hpa.minReplicas }}
-  maxReplicas: {{ default 3 $value.hpa.maxReplicas }}
+  minReplicas: {{ $value.hpa.minReplicas }}
+  maxReplicas: {{ $value.hpa.maxReplicas }}
+  {{- with $value.hpa.metrics }}
   metrics:
-    {{- toYaml $value.hpa.metrics | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with $value.hpa.behavior }}
   behavior:
     {{- toYaml . | nindent 4 }}

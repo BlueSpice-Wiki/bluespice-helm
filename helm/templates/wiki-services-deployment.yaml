@@ -40,28 +40,8 @@ spec:
       {{- end }}
       {{- $statefulDbEnabled := and $.Values.statefulBackendServices $.Values.statefulBackendServices.database $.Values.statefulBackendServices.database.enabled }}
       {{- $statefulSearchEnabled := and $.Values.statefulBackendServices $.Values.statefulBackendServices.search $.Values.statefulBackendServices.search.enabled }}
-      initContainers:
-        - name: prepare-bluespice
-          {{- $backendRepo := default "docker.bluespice.com/bluespice" $.Values.global.image.backendrepo }}
-          {{- $backendTag := default $.Chart.AppVersion $.Values.global.image.backendTag }}
-          {{- $helperName := default "k8s-helper" $.Values.global.image.helperName }}
-          image: {{ printf "%s/%s:%s" $backendRepo $helperName $backendTag }}
-          imagePullPolicy: {{ default "IfNotPresent" $.Values.global.imagePullPolicy }}
-          command: ["/app/bin/prepare-bluespice"]
-          envFrom:
-            - configMapRef:
-                name: {{ include "bluespice.fullname" $ }}-wiki-config
-            {{- if $.Values.wikiEnv.extraEnvFrom }}
-            {{- toYaml $.Values.wikiEnv.extraEnvFrom | nindent 12 }}
-            {{- end }}
-          {{- if $value.volumes }}
-          volumeMounts:
-          {{- range $vol := $value.volumes }}
-            - name: {{ $vol.name }}
-              mountPath: {{ $vol.path }}
-          {{- end }}
-          {{- end }}
       {{- if $statefulDbEnabled }}
+      initContainers:
         - name: wait-for-db
           image: busybox
           command: ['sh', '-c', 'until nc -z {{ default "database" $.Values.statefulBackendServices.database.name }} {{ default 3306 $.Values.statefulBackendServices.database.port }}; do echo waiting for database; sleep 5; done;']
@@ -85,19 +65,12 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ include "bluespice.fullname" $ }}-wiki-config
-          {{- if $.Values.wikiEnv.extraEnvFrom }}
-          {{- toYaml $.Values.wikiEnv.extraEnvFrom | nindent 10 }}
-          {{- end }}
         env:
         {{- if $value.extraEnv }}
         {{- range $envKey, $envValue := $value.extraEnv }}
           - name: {{ $envKey }}
             value: "{{ $envValue }}"
         {{- end }}
-        {{- end }}
-        {{- if not $.Values.ai.enabled }}
-          - name: CHAT_HOST
-            value: "-"
         {{- end }}
         {{- if $statefulDbEnabled }}
           - name: DB_PASS
@@ -140,8 +113,8 @@ spec:
         {{- range $vol := $value.volumes }}
         - name: {{ $vol.name }}
           mountPath: {{ $vol.path }}
-          {{- if $vol.subPath }}
-          subPath: {{ $vol.subPath }}
+          {{- if eq $vol.name "wiki" }}
+          subPath: wiki
           {{- end }}
         {{- end }}
         {{- end }}
@@ -164,19 +137,12 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ include "bluespice.fullname" $ }}-wiki-config
-          {{- if $.Values.wikiEnv.extraEnvFrom }}
-          {{- toYaml $.Values.wikiEnv.extraEnvFrom | nindent 10 }}
-          {{- end }}
         env:
         {{- if $wikiTask.extraEnv }}
         {{- range $envKey, $envValue := $wikiTask.extraEnv }}
           - name: {{ $envKey }}
             value: "{{ $envValue }}"
         {{- end }}
-        {{- end }}
-        {{- if not $.Values.ai.enabled }}
-          - name: CHAT_HOST
-            value: "-"
         {{- end }}
         {{- if $statefulDbEnabled }}
           - name: DB_PASS
@@ -215,8 +181,8 @@ spec:
         {{- range $vol := $wikiTask.volumes }}
         - name: {{ $vol.name }}
           mountPath: {{ $vol.path }}
-          {{- if $vol.subPath }}
-          subPath: {{ $vol.subPath }}
+          {{- if eq $vol.name "wiki" }}
+          subPath: wiki
           {{- end }}
         {{- end }}
         {{- end }}

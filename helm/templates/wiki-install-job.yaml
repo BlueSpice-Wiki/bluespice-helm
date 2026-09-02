@@ -1,4 +1,5 @@
-{{- if .Values.installation.enabled }}
+{{- $installation := default (dict "enabled" true) .Values.installation }}
+{{- if (default true $installation.enabled) }}
 {{- $statefulDbEnabled := and .Values.statefulBackendServices .Values.statefulBackendServices.database .Values.statefulBackendServices.database.enabled }}
 {{- $baseRepo := default "docker.bluespice.com/bluespice" .Values.global.image.repository }}
 {{- $wikiTag := default .Chart.AppVersion .Values.global.image.wikiTag }}
