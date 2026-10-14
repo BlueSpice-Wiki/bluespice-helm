@@ -1,5 +1,11 @@
 apiVersion: v2
 name: bluespice
-description: A Helm chart for Kubernetes
+description: A Helm chart for containerized deployment of BlueSpice MediaWiki on Kubernetes
+icon: https://upload.wikimedia.org/wikipedia/commons/c/c4/Bluespice_Icon.svg
+home: https://bluespice.com
+keywords:
+  - bluespice
+  - mediawiki
+  - kubernetes
 version: 1.1.1
 appVersion: "5.2"
