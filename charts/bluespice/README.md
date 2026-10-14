@@ -149,7 +149,6 @@ kubectl exec -n bluespice deployment/wiki-web -c wiki-web -- cat /data/initialAd
 |---|---|---|
 | `global.image.repository` | `bluespice` | Registry/org for the wiki image (`bluespice/wiki`) |
 | `global.image.backendrepo` | `bluespice` | Registry/org for backend images (diagram, pdf, …) |
-| `global.image.helperName` | `helper` | Init-container image name (private registries may use `k8s-helper`) |
 | `global.image.wikiTag` | `5.2` | Wiki image tag |
 | `global.image.backendTag` | `5.2` | Backend image tag |
 | `global.imagePullPolicy` | `IfNotPresent` | Image pull policy |

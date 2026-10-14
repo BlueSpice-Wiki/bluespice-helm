@@ -17,7 +17,6 @@ global:
   image:
     repository: bluespice   # Docker Hub; override for private registry
     backendrepo: bluespice  # Docker Hub; override for private registry
-    helperName: "helper"    # public Docker Hub image name (private registries use k8s-helper)
     wikiTag: "5.2"          # defaults to chart appVersion when empty
     backendTag: "5.2"       # defaults to chart appVersion when empty
 
