@@ -36,8 +36,8 @@ kubectl create namespace bluespice
 # 2. Install
 helm install bluespice . -n bluespice -f values-local.yaml
 
-# 3. Wait for the install Job to complete (~3-5 min on first install)
-kubectl wait --for=condition=complete job/bluespice-install -n bluespice --timeout=600s
+# 3. Wait for the wiki to start (~3-5 min on first install)
+kubectl wait --for=condition=Ready pod -l 'app in (wiki-web,wiki-task)' -n bluespice --timeout=600s
 
 # 4. Access the wiki
 kubectl port-forward -n bluespice svc/wiki-web 8080:80
@@ -47,12 +47,7 @@ kubectl port-forward -n bluespice svc/wiki-web 8080:80
 > [!NOTE]
 > Wait a few seconds after the port-forward starts before opening the URL. PHP-FPM inside the pod may still be initializing and will return HTTP 503 briefly.
 
-The post-install Job runs `/app/bin/run-installation` automatically and sets up the database schema. On subsequent `helm upgrade` calls the Job does not run again.
-
-To disable the install Job (e.g. when restoring from backup):
-```bash
-helm install bluespice . -n bluespice -f values-local.yaml --set installation.enabled=false
-```
+Database initialisation runs automatically in the `wiki-task` container (`start-installer && start-task --runAll`) and sets up the database schema on first install. When `wikiServicesCombineWebAndTask` is enabled, the installer runs in the `wiki-task` container of the combined pod.
 
 ### Local secrets for minikube
 
@@ -63,7 +58,7 @@ Replace the placeholders in `values-local.yaml` before install:
 - `statefulBackendServices.database.secrets.MARIADB_PASSWORD`
 
 > [!IMPORTANT]
-> All three passwords must be **at least 10 characters** long. MediaWiki enforces this for the admin password, and using shorter values causes the install Job to silently skip database setup — the Job will still report success, but the wiki will be non-functional.
+> All three passwords must be **at least 10 characters** long. MediaWiki enforces this for the admin password, and using shorter values causes the installer to silently skip database setup — it will still report success, but the wiki will be non-functional.
 
 The file already includes the other Minikube-local defaults such as `global.image.*`, `wikiEnv.configEnv.EDITION`, `wikiServicesCombineWebAndTask`, `wikiEnv.extraEnvFrom`, and the `wire` env wiring.
 
@@ -216,7 +211,7 @@ For local development, use the [Minikube notes](#minikube) in [Platform-Specific
 helm upgrade bluespice . -n bluespice -f values-local.yaml
 ```
 
-The post-install Job does **not** run on upgrade. To run database updates manually after an upgrade:
+To run database updates manually after an upgrade:
 ```bash
 kubectl exec -n bluespice deployment/wiki-web -c wiki-web -- /app/bin/run-updates
 ```

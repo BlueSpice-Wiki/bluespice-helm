@@ -24,10 +24,6 @@ global:
 ai:
   enabled: false
 
-# Set to false to skip the post-install DB initialisation Job (e.g. when restoring from backup)
-installation:
-  enabled: true
-
 #if needed change tls secret and add annottations.
 ingress:
     ingressAnnotations: {}
@@ -91,7 +87,7 @@ wikiServices:
     replicas: 1
     extraEnv:
       BACKUP_HOUR: "02"
-    args: ["start-task --runAll"]
+    args: ["start-installer && start-task --runAll"]
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
