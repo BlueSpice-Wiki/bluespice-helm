@@ -33,13 +33,25 @@ Helm chart for containerized deployment of [BlueSpice Wiki](https://bluespice.co
 # 1. Create namespace
 kubectl create namespace bluespice
 
-# 2. Install
+# 2. Create secrets
+kubectl -n bluespice create secret generic internal-wiki-secrets \
+  --from-literal=CHAT_AI_CHAT_SERVICE_API_KEY=$(openssl rand -base64 128 | tr -d '/+=\n' | head -c 64) \
+  --from-literal=INTERNAL_CHAT_TOKEN=$(openssl rand -base64 128 | tr -d '/+=\n' | head -c 64) \
+  --from-literal=INTERNAL_CHAT_WIKI_ACCESS_TOKEN=$(openssl rand -base64 128 | tr -d '/+=\n' | head -c 64) \
+  --from-literal=INTERNAL_SIMPLESAMLPHP_ADMIN_PASS=$(openssl rand -base64 64 | tr -d '/+=\n' | head -c 16) \
+  --from-literal=INTERNAL_SIMPLESAMLPHP_SECRET_SALT=$(openssl rand -base64 128 | tr -d '/+=\n' | head -c 64) \
+  --from-literal=INTERNAL_WIKI_UPGRADEKEY=$(openssl rand -base64 64 | tr -d '/+=\n' | head -c 16) \
+  --from-literal=INTERNAL_WIKI_SECRETKEY=$(openssl rand -base64 128 | tr -d '/+=\n' | head -c 64) \
+  --from-literal=INTERNAL_WIKI_TOKEN_AUTH_SALT=$(openssl rand -base64 128 | tr -d '/+=\n' | head -c 64) \
+  --from-literal=INTERNAL_WIRE_API_KEY=$(openssl rand -base64 128 | tr -d '/+=\n' | head -c 64)
+
+# 3. Install
 helm install bluespice . -n bluespice -f values-local.yaml
 
-# 3. Wait for the wiki to start (~3-5 min on first install)
+# 4. Wait for the wiki to start (~3-5 min on first install)
 kubectl wait --for=condition=Ready pod -l 'app in (wiki-web,wiki-task)' -n bluespice --timeout=600s
 
-# 4. Access the wiki
+# 5. Access the wiki
 kubectl port-forward -n bluespice svc/wiki-web 8080:80
 # → http://localhost:8080
 ```
