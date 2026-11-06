@@ -16,7 +16,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- if not (and $value.hpa $value.hpa.enabled) }}
   replicas: {{ $value.replicas }}
+  {{- end }}
   selector:
     matchLabels:
       app: {{ $value.name }}
@@ -44,8 +46,7 @@ spec:
         - name: prepare-bluespice
           {{- $backendRepo := default "docker.bluespice.com/bluespice" $.Values.global.image.backendrepo }}
           {{- $backendTag := default $.Chart.AppVersion $.Values.global.image.backendTag }}
-          {{- $helperName := default "k8s-helper" $.Values.global.image.helperName }}
-          image: {{ printf "%s/%s:%s" $backendRepo $helperName $backendTag }}
+          image: {{ printf "%s/k8s-helper:%s" $backendRepo $backendTag }}
           imagePullPolicy: {{ default "IfNotPresent" $.Values.global.imagePullPolicy }}
           command: ["/app/bin/prepare-bluespice"]
           envFrom:
