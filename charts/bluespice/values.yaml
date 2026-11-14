@@ -111,6 +111,8 @@ wikiEnv:
     WIKI_LANG: "en"
     WIKI_PASSWORDSENDER: 
     WIKI_EMERGENCYCONTACT: 
+    WIKI_BASE_PATH: "/" # must end in '/'
+    WIKI_ARTICLE_PATH: "wiki"
     WIKI_HOST: "localhost"  # set to your domain in production
     WIKI_PORT: "80"
     WIKI_PROTOCOL: "http"
