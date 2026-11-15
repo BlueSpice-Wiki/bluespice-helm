@@ -20,6 +20,22 @@ global:
     wikiTag: "5.2"          # defaults to chart appVersion when empty
     backendTag: "5.2"       # defaults to chart appVersion when empty
 
+  # Extra volumes added to all wiki, stateless, and stateful deployments
+  extraVolumes:
+    # Example adding a custom CA
+    #my-custom-ca:
+    #  configMap:
+    #    name: custom-trustbundle
+    #    items:
+    #    - key: bundle.pem
+    #      path: ca-certificates.crt
+
+  # Extra volumes mounts added to all wiki, stateless, and stateful deployments
+  extraVolumeMounts:
+    # Example adding a custom CA mount
+    #my-custom-ca:
+    #  mountPath: /etc/ssl/certs
+
 # AI service settings (future use)
 ai:
   enabled: false
@@ -70,6 +86,8 @@ wikiServices:
         name: wiki
         claim: wiki-pvc   # set to existing PVC name; falls back to <name>-pvc if omitted
         subPath: wiki     # init-container writes into wiki/ subdirectory on the PVC
+    extraVolumes: {} # merged with global.extraVolumes
+    extraVolumeMounts: {} # merged with global.extraVolumeMounts
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -97,6 +115,8 @@ wikiServices:
         name: wiki
         claim: wiki-pvc
         subPath: wiki
+    extraVolumes: {} # merged with global.extraVolumes
+    extraVolumeMounts: {} # merged with global.extraVolumeMounts
     nodeSelector: {}
     tolerations: []
     affinity: {}
@@ -173,6 +193,8 @@ statelessbackendServices:
               type: Utilization
               averageUtilization: 80
       behavior: {}
+    extraVolumes: {} # merged with global.extraVolumes
+    extraVolumeMounts: {} # merged with global.extraVolumeMounts
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -197,6 +219,8 @@ statelessbackendServices:
               type: Utilization
               averageUtilization: 80
       behavior: {}
+    extraVolumes: {} # merged with global.extraVolumes
+    extraVolumeMounts: {} # merged with global.extraVolumeMounts
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -221,6 +245,8 @@ statelessbackendServices:
               type: Utilization
               averageUtilization: 80
       behavior: {}
+    extraVolumes: {} # merged with global.extraVolumes
+    extraVolumeMounts: {} # merged with global.extraVolumeMounts
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -233,6 +259,8 @@ statelessbackendServices:
     replicas: 1
     port: 11211
     targetPort: 11211
+    extraVolumes: {} # merged with global.extraVolumes
+    extraVolumeMounts: {} # merged with global.extraVolumeMounts
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -245,6 +273,8 @@ statelessbackendServices:
     replicas: 1
     port: 80
     targetPort: 8080
+    extraVolumes: {} # merged with global.extraVolumes
+    extraVolumeMounts: {} # merged with global.extraVolumeMounts
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -284,6 +314,8 @@ statelessbackendServices:
           secretKeyRef:
             name: internal-wiki-secrets
             key: INTERNAL_WIKI_TOKEN_AUTH_SALT
+    extraVolumes: {} # merged with global.extraVolumes
+    extraVolumeMounts: {} # merged with global.extraVolumeMounts
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -298,6 +330,8 @@ statefulBackendServices:
     image: mongo:8.2
     port: 27017
     targetPort: 27017
+    extraVolumes: {} # merged with global.extraVolumes
+    extraVolumeMounts: {} # merged with global.extraVolumeMounts
     podSecurityContext: {}
     volumes:
       - path: /data/db
@@ -313,6 +347,8 @@ statefulBackendServices:
     image: bluespice/search:5.2
     port: 9200
     targetPort: 9200    
+    extraVolumes: {} # merged with global.extraVolumes
+    extraVolumeMounts: {} # merged with global.extraVolumeMounts
     podSecurityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
@@ -330,6 +366,8 @@ statefulBackendServices:
     image: mariadb:10.5
     port: 3306
     targetPort: 3306
+    extraVolumes: {} # merged with global.extraVolumes
+    extraVolumeMounts: {} # merged with global.extraVolumeMounts
     podSecurityContext: {}
     env:
       - name: MARIADB_DATABASE

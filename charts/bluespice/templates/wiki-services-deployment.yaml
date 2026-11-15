@@ -42,6 +42,7 @@ spec:
       {{- end }}
       {{- $statefulDbEnabled := and $.Values.statefulBackendServices $.Values.statefulBackendServices.database $.Values.statefulBackendServices.database.enabled }}
       {{- $statefulSearchEnabled := and $.Values.statefulBackendServices $.Values.statefulBackendServices.search $.Values.statefulBackendServices.search.enabled }}
+      {{- $extraVolumeMounts := include "bluespice.extraVolumeMounts" (list $ $value) | fromYamlArray }}
       initContainers:
         - name: prepare-bluespice
           {{- $backendRepo := default "docker.bluespice.com/bluespice" $.Values.global.image.backendrepo }}
@@ -55,11 +56,14 @@ spec:
             {{- if $.Values.wikiEnv.extraEnvFrom }}
             {{- toYaml $.Values.wikiEnv.extraEnvFrom | nindent 12 }}
             {{- end }}
-          {{- if $value.volumes }}
+          {{- if or $value.volumes $extraVolumeMounts }}
           volumeMounts:
           {{- range $vol := $value.volumes }}
             - name: {{ $vol.name }}
               mountPath: {{ $vol.path }}
+          {{- end }}
+          {{- with $extraVolumeMounts }}
+          {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- end }}
       {{- if $statefulDbEnabled }}
@@ -136,7 +140,7 @@ spec:
         readinessProbe:
             {{- toYaml $value.readinessProbe | nindent 12 }}
         {{- end }}
-        {{- if $value.volumes }}
+        {{- if or $value.volumes $extraVolumeMounts }}
         volumeMounts:
         {{- range $vol := $value.volumes }}
         - name: {{ $vol.name }}
@@ -144,6 +148,9 @@ spec:
           {{- if $vol.subPath }}
           subPath: {{ $vol.subPath }}
           {{- end }}
+        {{- end }}
+        {{- with $extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- end }}
       {{- if and $combineWebTask (eq $key "wiki-web") }}
@@ -211,7 +218,8 @@ spec:
         readinessProbe:
             {{- toYaml $wikiTask.readinessProbe | nindent 12 }}
         {{- end }}
-        {{- if $wikiTask.volumes }}
+        {{- $extraTaskVolumeMounts := include "bluespice.extraVolumeMounts" (list $ $wikiTask) | fromYamlArray }}
+        {{- if or $wikiTask.volumes $extraTaskVolumeMounts }}
         volumeMounts:
         {{- range $vol := $wikiTask.volumes }}
         - name: {{ $vol.name }}
@@ -220,8 +228,12 @@ spec:
           subPath: {{ $vol.subPath }}
           {{- end }}
         {{- end }}
+        {{- with $extraTaskVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         {{- end }}
       {{- end }}
+      {{- $extraVolumes := include "bluespice.extraVolumes" (list $ $value) | fromYamlArray  }}
       {{- $volumes := dict }}
       {{- range $vol := $value.volumes }}
       {{- $_ := set $volumes $vol.name $vol }}
@@ -230,13 +242,18 @@ spec:
         {{- range $vol := $wikiTask.volumes }}
         {{- $_ := set $volumes $vol.name $vol }}
         {{- end }}
+        {{- $newExtraVolumes := mustMergeOverwrite (dict) (default dict $wikiTask.extraVolumes) (default dict $value.extraVolumes) }}
+        {{- $extraVolumes = include "bluespice.extraVolumes" (list $ (dict "extraVolumes" $newExtraVolumes)) | fromYamlArray }}
       {{- end }}
-      {{- if gt (len $volumes) 0 }}
+      {{- if or (gt (len $volumes) 0) $extraVolumes }}
       volumes:
       {{- range $name, $vol := $volumes }}
       - name: {{ $vol.name }}
         persistentVolumeClaim:
           claimName: {{ default (printf "%s-pvc" $vol.name) $vol.claim }}
+      {{- end }}
+      {{- with $extraVolumes }}
+      {{- toYaml . | nindent 6 }}
       {{- end }}
       {{- end }}
       {{- if or $.Values.global.regcred $.Values.global.regcredName }}

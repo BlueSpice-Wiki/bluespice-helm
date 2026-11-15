@@ -37,23 +37,31 @@ spec:
         - secretRef:
             name: bluespice-database-secrets
         {{- end }}
-        {{- if $value.volumes }}
+        {{- $extraVolumeMounts := include "bluespice.extraVolumeMounts" (list $ $value) | fromYamlArray }}
+        {{- if or $value.volumes $extraVolumeMounts }}
         volumeMounts:
         {{- range $vol := $value.volumes }}
         - name: {{ $vol.claim }}
           mountPath: {{ $vol.path }}
+        {{- end }}
+        {{- with $extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- end }}
         {{- if $value.resources }}
         resources:
           {{- toYaml $value.resources | nindent 10 }}
         {{- end }}
-      {{- if $value.volumes }}
+      {{- $extraVolumes := include "bluespice.extraVolumes" (list $ $value) | fromYamlArray  }}
+      {{- if or $value.volumes $extraVolumes }}
       volumes:
       {{- range $vol := $value.volumes }}
       - name: {{ $vol.claim }}
         persistentVolumeClaim:
           claimName: {{ $vol.claim }}
+      {{- end }}
+      {{- with $extraVolumes }}
+      {{- toYaml . | nindent 6 }}
       {{- end }}
       {{- end }}
 
