@@ -359,3 +359,6 @@ statefulBackendServices:
         resources:
           requests:
             storage: "1Gi"
+
+# List of extra Kubernetes resources to deploy alongside the chart. Supports Helm templating via tpl (default: [])
+extraDeploy: []
