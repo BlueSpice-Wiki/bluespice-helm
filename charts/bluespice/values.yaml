@@ -17,17 +17,12 @@ global:
   image:
     repository: bluespice   # Docker Hub; override for private registry
     backendrepo: bluespice  # Docker Hub; override for private registry
-    helperName: "helper"    # public Docker Hub image name (private registries use k8s-helper)
     wikiTag: "5.2"          # defaults to chart appVersion when empty
     backendTag: "5.2"       # defaults to chart appVersion when empty
 
 # AI service settings (future use)
 ai:
   enabled: false
-
-# Set to false to skip the post-install DB initialisation Job (e.g. when restoring from backup)
-installation:
-  enabled: true
 
 #if needed change tls secret and add annottations.
 ingress:
@@ -93,7 +88,7 @@ wikiServices:
     replicas: 1
     extraEnv:
       BACKUP_HOUR: "02"
-    args: ["start-task --runAll"]
+    args: ["start-installer && start-task --runAll"]
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -129,7 +124,7 @@ wikiEnv:
     SMTP_PORT: ""
     SMTP_USER: ""
     SMTP_PASS: ""
-    SMTP_ID_HOST: ""
+    SMTP_IDHOST: ""
     SEARCH_HOST: ""
     SEARCH_PORT: ""
     SEARCH_PROTOCOL: ""

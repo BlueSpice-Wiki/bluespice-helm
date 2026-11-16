@@ -26,7 +26,7 @@ data:
   SMTP_PORT: {{ default "" .Values.wikiEnv.configEnv.SMTP_PORT | quote }}
   SMTP_USER: {{ default "" .Values.wikiEnv.configEnv.SMTP_USER | quote }}
   SMTP_PASS: {{ default "" .Values.wikiEnv.configEnv.SMTP_PASS | quote }}
-  SMTP_ID_HOST: {{ default "" .Values.wikiEnv.configEnv.SMTP_ID_HOST | quote }}
+  SMTP_IDHOST: {{ default "" .Values.wikiEnv.configEnv.SMTP_IDHOST | quote }}
   SEARCH_HOST: {{ default "" .Values.wikiEnv.configEnv.SEARCH_HOST | quote }}
   SEARCH_PORT: {{ default "" .Values.wikiEnv.configEnv.SEARCH_PORT | quote }}
   SEARCH_PROTOCOL: {{ default "" .Values.wikiEnv.configEnv.SEARCH_PROTOCOL | quote }}
