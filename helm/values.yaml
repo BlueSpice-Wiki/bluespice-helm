@@ -31,6 +31,7 @@ installation:
 
 #if needed change tls secret and add annottations.
 ingress:
+    enabled: true
     ingressAnnotations: {}
     wireAnnotations: {}
     tls: true
@@ -160,6 +161,7 @@ wikiServicesVolume:
 
 statelessbackendServices:
   diagram:
+    enabled: true
     name: diagram
     replicas: 1
     port: 80  
@@ -183,6 +185,7 @@ statelessbackendServices:
     tolerations: []
     affinity: {}
   pdf:
+    enabled: true
     name: pdf
     replicas: 1
     port: 8080  
@@ -206,6 +209,7 @@ statelessbackendServices:
     tolerations: []
     affinity: {}
   formula:
+    enabled: true
     name: formula
     replicas: 1
     port: 10044
@@ -229,6 +233,7 @@ statelessbackendServices:
     tolerations: []
     affinity: {}
   cache:
+    enabled: true
     name: cache
     replicas: 1
     port: 11211
@@ -240,6 +245,7 @@ statelessbackendServices:
     tolerations: []
     affinity: {}
   collabpads:
+    enabled: true
     name: collabpads
     replicas: 1
     port: 80
@@ -264,6 +270,7 @@ statelessbackendServices:
       name: ""          # reuse this Secret if set; skips creation
       passwordKey: COLLABPADS_BACKEND_MONGO_DB_PASSWORD
   wire:
+    enabled: true
     name: wire
     replicas: 1
     port: 3333
