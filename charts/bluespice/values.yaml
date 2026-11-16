@@ -123,7 +123,7 @@ wikiEnv:
     SMTP_PORT: ""
     SMTP_USER: ""
     SMTP_PASS: ""
-    SMTP_ID_HOST: ""
+    SMTP_IDHOST: ""
     SEARCH_HOST: ""
     SEARCH_PORT: ""
     SEARCH_PROTOCOL: ""
