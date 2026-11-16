@@ -10,7 +10,9 @@ metadata:
   name: {{ $claimName }}
   namespace: {{ default "default" $.Release.Namespace }}
 spec:
-  storageClassName: {{ default "" $vol.storageClassName }}
+  {{- if $vol.storageClassName }}
+  storageClassName: {{ $vol.storageClassName }}
+  {{- end }}
   accessModes:
     {{- if $vol.accessModes }}
     {{- range $mode := $vol.accessModes }}

@@ -7,8 +7,10 @@ metadata:
   name: {{ $volume.claim }}
   namespace: {{ default "default" $.Release.Namespace }}
 spec:
+  {{- if $volume.storageClassName }}
   storageClassName: {{ $volume.storageClassName }}
-  accessModes: 
+  {{- end }}
+  accessModes:
     {{- range $mode := $volume.accessModes }}
       - {{ $mode }}
     {{- end }}
