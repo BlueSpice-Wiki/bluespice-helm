@@ -46,7 +46,7 @@ spec:
         - name: prepare-bluespice
           {{- $backendRepo := default "docker.bluespice.com/bluespice" $.Values.global.image.backendrepo }}
           {{- $backendTag := default $.Chart.AppVersion $.Values.global.image.backendTag }}
-          image: {{ printf "%s/k8s-helper:%s" $backendRepo $backendTag }}
+          image: {{ printf "%s/helper:%s" $backendRepo $backendTag }}
           imagePullPolicy: {{ default "IfNotPresent" $.Values.global.imagePullPolicy }}
           command: ["/app/bin/prepare-bluespice"]
           envFrom:
