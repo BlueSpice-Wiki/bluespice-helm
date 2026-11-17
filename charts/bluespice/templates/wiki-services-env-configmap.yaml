@@ -8,6 +8,8 @@ metadata:
 data:
   VERSION: {{ default "" .Values.wikiEnv.configEnv.VERSION | quote }}
   EDITION: {{ required "wikiEnv.configEnv.EDITION is required" .Values.wikiEnv.configEnv.EDITION | quote }}
+  WIKI_BASE_PATH: {{ .Values.wikiEnv.configEnv.WIKI_BASE_PATH | quote }}
+  WIKI_ARTICLE_PATH: {{ .Values.wikiEnv.configEnv.WIKI_ARTICLE_PATH | quote }}
   WIKI_NAME: {{ required "wikiEnv.configEnv.WIKI_NAME is required" .Values.wikiEnv.configEnv.WIKI_NAME | quote }}
   WIKI_LANG: {{ required "wikiEnv.configEnv.WIKI_LANG is required" .Values.wikiEnv.configEnv.WIKI_LANG | quote }}
   WIKI_PASSWORDSENDER: {{ default "" .Values.wikiEnv.configEnv.WIKI_PASSWORDSENDER | quote }}
