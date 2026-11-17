@@ -7,6 +7,10 @@ metadata:
   namespace: {{ default "default" $.Release.Namespace }}
   labels:
     app: {{ $value.name }}
+  {{- with $value.serviceAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ $.Values.global.svc.type }}
   selector:
