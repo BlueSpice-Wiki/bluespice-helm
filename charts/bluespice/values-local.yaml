@@ -1,88 +1,22 @@
-# Local development overrides — replace the password placeholders before install
+# Local development and ci overrides
 
-global:
-  imagePullPolicy: IfNotPresent
-  image:
-    repository: bluespice
-    backendrepo: bluespice
-    wikiTag: "5.2"
-    backendTag: "5.2"
-
-# minikube only supports ReadWriteOnce; combine wiki-web + wiki-task in one pod to share the PVC
+# Minikube's hostpath storage only supports ReadWriteOnce: run wiki-web + wiki-task
+# in one pod to share the PVC.
 wikiServicesCombineWebAndTask: true
 wikiServicesVolume:
   wiki-pvc:
-    storageClassName: "standard"
     accessModes: ["ReadWriteOnce"]
-    resources:
-      requests:
-        storage: "5Gi"
 
 wikiEnv:
   configEnv:
-    EDITION: "free"
     WIKI_NAME: "BlueSpice Local"
-    WIKI_LANG: "en"
-    WIKI_HOST: "localhost"
     WIKI_PORT: "8080"
-    WIKI_PROTOCOL: "http"
-    DB_USER: "bluespice"
-    DB_HOST: "database"
-    DB_NAME: "bluespice"
-    DB_PREFIX: ""
-    WIKI_INITIAL_ADMIN_USER: "Admin"
-    WIKI_INITIAL_ADMIN_PASS: "pw123123123"  # replace before install — min. 10 characters required
-  extraEnvFrom:
-    - secretRef:
-        name: internal-wiki-secrets
-
-statelessbackendServices:
-  wire:
-    configEnv:
-      WIRE_WIKI_BASE_PATH: "http://wiki-web"
-      WIRE_LOG_LEVEL: ""
-    extraEnv:
-      - name: WIRE_API_KEY
-        valueFrom:
-          secretKeyRef:
-            name: internal-wiki-secrets
-            key: INTERNAL_WIRE_API_KEY
-      - name: WIRE_TOKEN_SALT
-        valueFrom:
-          secretKeyRef:
-            name: internal-wiki-secrets
-            key: INTERNAL_WIKI_TOKEN_AUTH_SALT
-
+    WIKI_INITIAL_ADMIN_PASS: "CHANGE_ME_ADMIN_PASSWORD"
+    
 statefulBackendServices:
   database:
-    enabled: true
     secrets:
-      MARIADB_ROOT_PASSWORD: "pw123123123123"  # replace before install — min. 10 characters required
-      MARIADB_PASSWORD: "pw123123123123"       # replace before install — min. 10 characters required
-    volumes:
-      - path: /var/lib/mysql
-        claim: database-data-pvc
-        storageClassName: "standard"
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: "5Gi"
-      - path: /var/log/mysql
-        claim: database-logs-pvc
-        storageClassName: "standard"
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: "1Gi"
-  collabpadsDatabase:
-    enabled: true
-    volumes:
-      - path: /data/db
-        claim: collabpads-pvc
-        storageClassName: "standard"
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: "2Gi"
+      MARIADB_ROOT_PASSWORD: "CHANGE_ME_MARIADB_ROOT_PASSWORD"
+      MARIADB_PASSWORD: "CHANGE_ME_MARIADB_PASSWORD"
   search:
     enabled: false
