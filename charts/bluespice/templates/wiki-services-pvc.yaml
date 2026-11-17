@@ -5,7 +5,9 @@ metadata:
   name: {{ $key }}
   namespace: {{ default "default" $.Release.Namespace }}
 spec:
+  {{- if $value.storageClassName }}
   storageClassName: {{ $value.storageClassName }}
+  {{- end }}
   accessModes:
     {{- range $mode := $value.accessModes }}
     - {{ $mode }}
