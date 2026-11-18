@@ -49,6 +49,7 @@ ingress:
     name: wiki-web
     tlsSecret: wiki-ingress-cert
     ingressClassName: ""
+    extraDomains: []
 
 ## If required, update kuberntes specific configs like resources, probes etc.
 ## Enable wikiServicesCombineWebAndTask to run wiki-web and wiki-task in one pod

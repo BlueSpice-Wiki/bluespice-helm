@@ -44,6 +44,9 @@ spec:
   tls:
   - hosts:
     - {{ $host }}
+    {{- range .Values.ingress.extraDomains }}
+    - {{ . }}
+    {{- end }}
     secretName: {{ $.Values.ingress.tlsSecret }}
   {{- end }}
 ---
@@ -84,6 +87,9 @@ spec:
   tls:
   - hosts:
     - {{ $host }}
+    {{- range .Values.ingress.extraDomains }}
+    - {{ . }}
+    {{- end }}
     secretName: {{ $.Values.ingress.tlsSecret }}
   {{- end }}
 {{- end }}
