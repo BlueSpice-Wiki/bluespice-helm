@@ -48,6 +48,7 @@ ingress:
     tls: true
     name: wiki-web
     tlsSecret: wiki-ingress-cert
+    tlsCertIssuer: ""
     ingressClassName: ""
 
 ## If required, update kuberntes specific configs like resources, probes etc.
