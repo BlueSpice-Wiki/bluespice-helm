@@ -20,7 +20,7 @@ spec:
         app: {{ $value.name }}
         {{- include "bluespice.selectorLabels" $ | nindent 8 }}
     spec:
-      {{- with $.Values.global.podSecurityContext }}
+      {{- with (default $.Values.global.podSecurityContext $value.podSecurityContext) }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -31,7 +31,7 @@ spec:
         {{- $tag := default $.Chart.AppVersion $.Values.global.image.backendTag }}
         image: {{ printf "%s/%s:%s" $baseRepo $value.name $tag }}
         imagePullPolicy: {{ default "IfNotPresent" $.Values.global.imagePullPolicy }}
-        {{- with $.Values.global.containerSecurityContext }}
+        {{- with (default $.Values.global.containerSecurityContext $value.securityContext) }}
         securityContext:
           {{- toYaml . | nindent 10 }}
         {{- end }}

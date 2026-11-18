@@ -36,7 +36,11 @@ spec:
         {{- end }}
     spec:
       enableServiceLinks: false
-      {{- with $.Values.global.podSecurityContext }}
+      {{- $podSec := $value.podSecurityContext }}
+      {{- if $combineWebTask }}
+        {{- $podSec = $wikiTask.podSecurityContext }}
+      {{- end }}
+      {{- with (default $.Values.global.podSecurityContext $podSec) }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -77,7 +81,7 @@ spec:
         {{- $wikiTag := default $.Chart.AppVersion $.Values.global.image.wikiTag }}
         image: {{ printf "%s/wiki:%s" $baseRepo $wikiTag }}
         imagePullPolicy: {{ default "IfNotPresent" $.Values.global.imagePullPolicy }}     
-        {{- with $.Values.global.containerSecurityContext }}
+        {{- with (default $.Values.global.containerSecurityContext $value.securityContext) }}
         securityContext:
           {{- toYaml . | nindent 10 }}
         {{- end }}
@@ -159,7 +163,7 @@ spec:
         {{- $wikiTag := default $.Chart.AppVersion $.Values.global.image.wikiTag }}
         image: {{ printf "%s/wiki:%s" $baseRepo $wikiTag }}
         imagePullPolicy: {{ default "IfNotPresent" $.Values.global.imagePullPolicy }}     
-        {{- with $.Values.global.containerSecurityContext }}
+        {{- with (default $.Values.global.containerSecurityContext $wikiTask.securityContext) }}
         securityContext:
           {{- toYaml . | nindent 10 }}
         {{- end }}
