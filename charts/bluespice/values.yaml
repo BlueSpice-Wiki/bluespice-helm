@@ -50,6 +50,15 @@ ingress:
     tlsSecret: wiki-ingress-cert
     ingressClassName: ""
 
+gateway:
+  enabled: false # true to create HTTPRoutes
+  name: wiki-web
+  className: "" # required to create Gateway resource
+  gatewayAnnotations: {}
+  httpRouteAnnotations: {}
+  redirectToHTTPS: false
+  redirectToBasePath: false # creates redirect to WIKI_BASE_PATH if not /
+
 ## If required, update kuberntes specific configs like resources, probes etc.
 ## Enable wikiServicesCombineWebAndTask to run wiki-web and wiki-task in one pod
 ## when RWX is not available. Both containers will share the same PVC mounts.
