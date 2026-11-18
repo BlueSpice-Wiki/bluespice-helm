@@ -60,7 +60,8 @@ Use: $var := include "bluespice.extraVolumeMounts" (list $ $value) | fromYamlArr
 {{- $items := list }}
 {{- range $name, $mount := $merged -}}
 {{- if $mount -}}
-  {{- $n := mustMergeOverwrite (dict "name" $name) $mount }}
+  {{- $vname := regexFind "^[a-z0-9-]+" $name | trimSuffix "-" }}
+  {{- $n := mustMergeOverwrite (dict "name" $vname) $mount }}
   {{- $items = append $items $n }}
 {{- end }}
 {{- end }}
