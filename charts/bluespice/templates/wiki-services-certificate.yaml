@@ -1,0 +1,32 @@
+{{- if and .Values.ingress.tls .Values.ingress.tlsCertIssuer }}
+{{- if not (.Capabilities.APIVersions.Has "cert-manager.io/v1/Certificate") -}}
+{{- fail "ingress.tlsCertIssuer set but Certificate CRDs (cert-manager.io/v1) are not installed in the cluster." -}}
+{{- end -}}
+{{- $host := required "wikiEnv.configEnv.WIKI_HOST required for tlsCert" $.Values.wikiEnv.configEnv.WIKI_HOST }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ default "wiki-tls" .Values.ingress.tlsSecret }}
+spec:
+  commonName: "Wiki Server"
+  dnsNames:
+  - {{ $host | quote }}
+  {{- range .Values.ingress.extraDomains }}
+  - {{ . | quote }}
+  {{- end }}
+  secretName: {{ default "wiki-tls" .Values.ingress.tlsSecret }}
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Never
+  renewBeforePercentage: 25
+  signatureAlgorithm: ECDSAWithSHA256
+  usages:
+  - "digital signature"
+  - "key encipherment"
+  - "server auth"
+  issuerRef:
+    name: {{ .Values.ingress.tlsCertIssuer }}
+    kind: ClusterIssuer
+    group: cert-manager.io
+{{- end }}
