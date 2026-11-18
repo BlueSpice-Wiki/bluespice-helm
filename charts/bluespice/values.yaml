@@ -21,6 +21,7 @@ global:
     backendTag: "5.2"       # defaults to chart appVersion when empty
 
   # Extra volumes added to all wiki, stateless, and stateful deployments
+  # Map key used as volume name.
   extraVolumes:
     # Example adding a custom CA
     #my-custom-ca:
@@ -31,6 +32,8 @@ global:
     #      path: ca-certificates.crt
 
   # Extra volumes mounts added to all wiki, stateless, and stateful deployments
+  # Map key prefix must match a volume name; key names are truncated at
+  # first invalid volume character (eg '_') to support duplicate references.
   extraVolumeMounts:
     # Example adding a custom CA mount
     #my-custom-ca:
