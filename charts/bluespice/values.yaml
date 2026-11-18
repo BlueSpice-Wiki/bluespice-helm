@@ -61,6 +61,8 @@ wikiServices:
     deploymentAnnotations: {}
     podAnnotations: {}
     podLabels: {}
+    podSecurityContext: {}
+    securityContext: {}
     ports: []
     replicas: 1
     serviceEnabled: true
@@ -104,6 +106,8 @@ wikiServices:
     targetPort: 9090
     podAnnotations: {}
     podLabels: {}
+    podSecurityContext: {}
+    securityContext: {}
     ports: []
     replicas: 1
     extraEnv:
@@ -183,6 +187,8 @@ statelessbackendServices:
     enabled: true
     name: diagram
     serviceAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
     replicas: 1
     port: 80  
     targetPort: 8080
@@ -210,6 +216,8 @@ statelessbackendServices:
     enabled: true
     name: pdf
     serviceAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
     replicas: 1
     port: 8080  
     targetPort: 8080
@@ -237,6 +245,8 @@ statelessbackendServices:
     enabled: true
     name: formula
     serviceAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
     replicas: 1
     port: 10044
     targetPort: 10044
@@ -264,6 +274,8 @@ statelessbackendServices:
     enabled: true
     name: cache
     serviceAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
     replicas: 1
     port: 11211
     targetPort: 11211
@@ -279,6 +291,8 @@ statelessbackendServices:
     enabled: true
     name: collabpads
     serviceAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
     replicas: 1
     port: 80
     targetPort: 8080
@@ -307,6 +321,8 @@ statelessbackendServices:
     enabled: true
     name: wire
     serviceAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
     replicas: 1
     port: 3333
     targetPort: 3333
@@ -344,6 +360,7 @@ statefulBackendServices:
     extraVolumes: {} # merged with global.extraVolumes
     extraVolumeMounts: {} # merged with global.extraVolumeMounts
     podSecurityContext: {}
+    securityContext: {}
     volumes:
       - path: /data/db
         claim: collabpads-pvc
@@ -364,6 +381,7 @@ statefulBackendServices:
     podSecurityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
+    securityContext: {}
     volumes:
       - path: /usr/share/opensearch/data
         claim: search-pvc
@@ -382,6 +400,7 @@ statefulBackendServices:
     extraVolumes: {} # merged with global.extraVolumes
     extraVolumeMounts: {} # merged with global.extraVolumeMounts
     podSecurityContext: {}
+    securityContext: {}
     env:
       - name: MARIADB_DATABASE
         value: bluespice
