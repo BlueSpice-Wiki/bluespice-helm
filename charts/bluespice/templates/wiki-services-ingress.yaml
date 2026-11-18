@@ -1,4 +1,5 @@
 {{- if .Values.ingress.enabled }}
+{{- $basePath := default "/" .Values.wikiEnv.configEnv.WIKI_BASE_PATH | trimSuffix "/" }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -19,27 +20,31 @@ spec:
   - host: {{ $host }}
     http:
       paths:
-      - path: /
+      - path: {{ printf "%s/" $basePath }}
         pathType: Prefix
         backend:
           service:
             name: {{ $.Values.ingress.name }}
             port:
               name: http
-      - path: /_collabpads
+      {{- if .Values.statelessbackendServices.collabpads.enabled }}
+      - path: {{ printf "%s/_collabpads" $basePath }}
         pathType: Prefix
         backend:
           service:
             name: collabpads
             port:
               name: http
-      - path: /_diagram
+      {{- end }}
+      {{- if .Values.statelessbackendServices.diagram.enabled }}
+      - path: {{ printf "%s/_diagram" $basePath }}
         pathType: Prefix
         backend:
           service:
             name: diagram
             port:
               name: http
+      {{- end }}
   {{- if $.Values.ingress.tls }}
   tls:
   - hosts:
@@ -47,6 +52,7 @@ spec:
     secretName: {{ $.Values.ingress.tlsSecret }}
   {{- end }}
 ---
+{{- if .Values.statelessbackendServices.wire.enabled }}
 {{- $wireAnnotations := dict }}
 {{- if $.Values.ingress.ingressAnnotations }}
 {{- $wireAnnotations = deepCopy $.Values.ingress.ingressAnnotations }}
@@ -73,7 +79,7 @@ spec:
   - host: {{ $host }}
     http:
       paths:
-      - path: /_wire
+      - path: {{ printf "%s/_wire" $basePath }}
         pathType: Prefix
         backend:
           service:
@@ -86,4 +92,5 @@ spec:
     - {{ $host }}
     secretName: {{ $.Values.ingress.tlsSecret }}
   {{- end }}
+{{- end }}
 {{- end }}
