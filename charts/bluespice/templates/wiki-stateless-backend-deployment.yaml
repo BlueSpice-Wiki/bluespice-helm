@@ -25,6 +25,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       enableServiceLinks: false
+      initContainers:
+      {{- with include "bluespice.extraInitContainers" (list $ $value) | fromYamlArray }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
       containers:
       - name: {{ $value.name }}
         {{- $baseRepo := default "docker.bluespice.com/bluespice" $.Values.global.image.backendrepo }}
