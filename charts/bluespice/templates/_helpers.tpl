@@ -85,3 +85,25 @@ Use: $var := include "bluespice.extraVolumes" (list $ $value) | fromYamlArray
 {{- end }}
 {{ toYaml $items }}
 {{- end -}}
+
+{{/*
+Creates list from merged extraInitContainers with global,
+  filters null (disabled) containers.
+Use: $var := include "bluespice.extraInitContainers" (list $ $value) | fromYamlArray
+*/}}
+{{- define "bluespice.extraInitContainers" -}}
+{{- $global := default dict (index . 0).Values.global.extraInitContainers }}
+{{- $extra := default dict (index . 1).extraInitContainers }}
+{{- $merged := mustMergeOverwrite (dict) $extra $global }}
+{{- $items := list }}
+{{- range $name, $container := $merged -}}
+  {{- if $container }}
+  {{- if not (typeIs "string" $container) }}
+    {{- $container = toYaml $container }}
+  {{- end }}
+  {{- $n := mustMergeOverwrite (dict "name" $name) (tpl $container (index $ 0) | fromYaml) }}
+  {{- $items = append $items $n }}
+  {{- end }}
+{{- end }}
+{{ toYaml $items }}
+{{- end -}}

@@ -44,6 +44,15 @@ spec:
       {{- $statefulSearchEnabled := and $.Values.statefulBackendServices $.Values.statefulBackendServices.search $.Values.statefulBackendServices.search.enabled }}
       {{- $extraVolumeMounts := include "bluespice.extraVolumeMounts" (list $ $value) | fromYamlArray }}
       initContainers:
+      {{- $initContainers := list }}
+      {{- if $combineWebTask }}
+        {{- $initContainers = include "bluespice.extraInitContainers" (list $ $wikiTask) | fromYamlArray }}
+      {{- else }}
+        {{- $initContainers = include "bluespice.extraInitContainers" (list $ $value) | fromYamlArray }}
+      {{- end }}
+      {{- with $initContainers }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
         - name: prepare-bluespice
           {{- $backendRepo := default "docker.bluespice.com/bluespice" $.Values.global.image.backendrepo }}
           {{- $backendTag := default $.Chart.AppVersion $.Values.global.image.backendTag }}
