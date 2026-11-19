@@ -44,9 +44,10 @@ spec:
       {{- $statefulSearchEnabled := and $.Values.statefulBackendServices $.Values.statefulBackendServices.search $.Values.statefulBackendServices.search.enabled }}
       {{- $extraVolumeMounts := include "bluespice.extraVolumeMounts" (list $ $value) | fromYamlArray }}
       initContainers:
+      {{- $backendRepo := default "docker.bluespice.com/bluespice" $.Values.global.image.backendrepo }}
+      {{- $backendTag := default $.Chart.AppVersion $.Values.global.image.backendTag }}
+      {{- if or $combineWebTask (eq $key "wiki-task") }}
         - name: prepare-bluespice
-          {{- $backendRepo := default "docker.bluespice.com/bluespice" $.Values.global.image.backendrepo }}
-          {{- $backendTag := default $.Chart.AppVersion $.Values.global.image.backendTag }}
           image: {{ printf "%s/helper:%s" $backendRepo $backendTag }}
           imagePullPolicy: {{ default "IfNotPresent" $.Values.global.imagePullPolicy }}
           command: ["/app/bin/prepare-bluespice"]
@@ -66,6 +67,7 @@ spec:
           {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- end }}
+      {{- end }}
       {{- if $statefulDbEnabled }}
         - name: wait-for-db
           image: busybox
