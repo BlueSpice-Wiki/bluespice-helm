@@ -1,0 +1,160 @@
+{{- if and .Values.gateway .Values.gateway.enabled }}
+{{- if not (.Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1/Gateway") -}}
+{{- fail "gateway.enabled=true but Gateway API CRDs (gateway.networking.k8s.io/v1) are not installed in the cluster." -}}
+{{- end -}}
+{{- if .Values.gateway.className }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ default "wiki-web" .Values.gateway.name }}
+  labels:
+    {{- include "bluespice.labels" . | nindent 4 }}
+  {{- with .Values.gateway.gatewayAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  gatewayClassName: {{ .Values.gateway.className }}
+  listeners:
+  {{- if .Values.ingress.tls }}
+  - name: https
+    port: 443
+    protocol: HTTPS
+    tls:
+      certificateRefs:
+      - group: ""
+        kind: Secret
+        name: {{ default "wiki-tls" .Values.ingress.tlsSecret }}
+  {{- end }}
+  {{- if or .Values.gateway.redirectToHTTPS (not .Values.ingress.tls) }}
+  - name: http
+    port: 80
+    protocol: HTTP
+  {{- end }}
+{{- end }}
+---
+{{- $basePath := default "/" .Values.wikiEnv.configEnv.WIKI_BASE_PATH | trimSuffix "/" }}
+{{- $host := required "wikiEnv.configEnv.WIKI_HOST required for gateway" $.Values.wikiEnv.configEnv.WIKI_HOST }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ default "wiki-web" .Values.gateway.name }}
+  labels:
+    {{- include "bluespice.labels" . | nindent 4 }}
+  {{- with .Values.gateway.httpRouteAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    - kind: Gateway
+      name: {{ default "wiki-web" .Values.gateway.name }}
+      {{- if .Values.ingress.tls }}
+      sectionName: https
+      {{- else }}
+      sectionName: http
+      {{- end }}
+  hostnames:
+  - {{ $host | quote }}
+  {{- range .Values.ingress.extraDomains }}
+  - {{ . | quote }}
+  {{- end }}
+  rules:
+  {{- if .Values.statelessbackendServices.collabpads.enabled }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ printf "%s/_collabpads" $basePath }}
+    backendRefs:
+    - kind: Service
+      name: collabpads
+      port: 80
+  {{- end }}
+  {{- if .Values.statelessbackendServices.diagram.enabled }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ printf "%s/_diagram" $basePath }}
+    backendRefs:
+    - kind: Service
+      name: diagram
+      port: 80
+  {{- end }}
+  {{- if .Values.statelessbackendServices.wire.enabled }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ printf "%s/_wire" $basePath }}
+    backendRefs:
+    - kind: Service
+      name: wire
+      port: 3333
+  {{- end }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ printf "%s/" $basePath }}
+    backendRefs:
+    - kind: Service
+      name: wiki-web
+      port: 80
+  {{- if and $basePath .Values.gateway.redirectToBasePath }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: "/"
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        statusCode: 301
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: {{ printf "%s/" $basePath }}
+  {{- end }}
+---
+{{ if and .Values.ingress.tls .Values.gateway.redirectToHTTPS }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ printf "%s-redirect" (default "wiki-web" .Values.gateway.name) }}
+  labels:
+    {{- include "bluespice.labels" . | nindent 4 }}
+  {{- with .Values.gateway.httpRouteAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    - kind: Gateway
+      name: {{ default "wiki-web" .Values.gateway.name }}
+      sectionName: http
+  hostnames:
+  - {{ $host | quote }}
+  {{- range .Values.ingress.extraDomains }}
+  - {{ . | quote }}
+  {{- end }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ printf "%s/" $basePath }}
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        statusCode: 301
+  {{- if and $basePath .Values.gateway.redirectToBasePath }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: "/"
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        statusCode: 301
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: {{ printf "%s/" $basePath }}
+  {{- end }}
+{{- end }}
+{{- end }}
