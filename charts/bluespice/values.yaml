@@ -50,6 +50,29 @@ ingress:
     tlsSecret: wiki-ingress-cert
     ingressClassName: ""
 
+# Optional frontend cache (Varnish). When enabled, ingress path / targets this
+# service instead of ingress.name, and it forwards to backendHost:backendPort.
+frontendcache:
+  enabled: false
+  name: frontendcache
+  replicas: 1
+  backendHost: wiki-web
+  backendPort: 80
+  port: 80
+  targetPort: 80
+  serviceAnnotations: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  podLabels: {}
+  extraVolumes: {} # merged with global.extraVolumes
+  extraVolumeMounts: {} # merged with global.extraVolumeMounts
+  livenessProbe: {}
+  readinessProbe: {}
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
 ## If required, update kuberntes specific configs like resources, probes etc.
 ## Enable wikiServicesCombineWebAndTask to run wiki-web and wiki-task in one pod
 ## when RWX is not available. Both containers will share the same PVC mounts.

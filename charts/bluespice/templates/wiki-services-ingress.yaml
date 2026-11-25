@@ -16,6 +16,10 @@ spec:
   {{- end }}
   rules:
   {{- $host := required "wikiEnv.configEnv.WIKI_HOST is required for ingress" $.Values.wikiEnv.configEnv.WIKI_HOST }}
+  {{- $rootServiceName := $.Values.ingress.name }}
+  {{- if $.Values.frontendcache.enabled }}
+  {{- $rootServiceName = $.Values.frontendcache.name }}
+  {{- end }}
   - host: {{ $host }}
     http:
       paths:
@@ -23,7 +27,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: {{ $.Values.ingress.name }}
+            name: {{ $rootServiceName }}
             port:
               name: http
       {{- if .Values.statelessbackendServices.collabpads.enabled }}

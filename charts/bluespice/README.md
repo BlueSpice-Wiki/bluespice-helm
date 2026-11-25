@@ -197,11 +197,25 @@ wikiEnv:
     SEARCH_PROTOCOL: http
 ```
 
+### Frontend cache
+
+Disabled by default. Enable it to place a Varnish cache in front of `wiki-web`:
+
+```yaml
+frontendcache:
+  enabled: true
+  # backendHost: wiki-web
+  # backendPort: 80
+```
+
+When enabled, Ingress path `/` targets the `frontendcache` Service instead of `ingress.name`, and the cache forwards to `wiki-web:80` (the wiki Service forwards to container port `9090`). The chart sets `VARNISH_HTTP_PORT` to `frontendcache.targetPort` so Varnish listens on the Service target port. The image follows the backend convention: `<global.image.backendrepo>/frontendcache:<global.image.backendTag>`.
+
 ### Optional Services
 
 | Value | Default | Description |
 |---|---|---|
 | `ai.enabled` | `false` | Enable AI service connection |
+| `frontendcache.enabled` | `false` | Deploy the optional frontend cache and route Ingress `/` through it |
 | `statefulBackendServices.search.enabled` | `false` | Enable bundled OpenSearch |
 
 ### Ingress
