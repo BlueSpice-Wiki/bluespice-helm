@@ -26,6 +26,7 @@ spec:
             name: {{ $.Values.ingress.name }}
             port:
               name: http
+      {{- if .Values.statelessbackendServices.collabpads.enabled }}
       - path: /_collabpads
         pathType: Prefix
         backend:
@@ -33,6 +34,8 @@ spec:
             name: collabpads
             port:
               name: http
+      {{- end }}
+      {{- if .Values.statelessbackendServices.diagram.enabled }}
       - path: /_diagram
         pathType: Prefix
         backend:
@@ -40,6 +43,7 @@ spec:
             name: diagram
             port:
               name: http
+      {{- end }}
   {{- if $.Values.ingress.tls }}
   tls:
   - hosts:
@@ -47,6 +51,7 @@ spec:
     secretName: {{ $.Values.ingress.tlsSecret }}
   {{- end }}
 ---
+{{- if .Values.statelessbackendServices.wire.enabled }}
 {{- $wireAnnotations := dict }}
 {{- if $.Values.ingress.ingressAnnotations }}
 {{- $wireAnnotations = deepCopy $.Values.ingress.ingressAnnotations }}
@@ -86,4 +91,5 @@ spec:
     - {{ $host }}
     secretName: {{ $.Values.ingress.tlsSecret }}
   {{- end }}
+{{- end }}
 {{- end }}
