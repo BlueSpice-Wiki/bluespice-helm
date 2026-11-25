@@ -4,6 +4,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ $key }}
   namespace: {{ default "default" $.Release.Namespace }}
+  {{- with $value.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if $value.storageClassName }}
   storageClassName: {{ $value.storageClassName }}

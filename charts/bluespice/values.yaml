@@ -192,6 +192,7 @@ wikiEnv:
 # Update the storage class name and storage capacity of wiki pvc.
 wikiServicesVolume:
   wiki-pvc:
+    annotations: {}
     storageClassName: ""
     accessModes: ["ReadWriteMany"]  # use ReadWriteOnce + wikiServicesCombineWebAndTask: true if RWX unavailable
     resources:
@@ -370,6 +371,7 @@ statefulBackendServices:
     volumes:
       - path: /data/db
         claim: collabpads-pvc
+        annotations: {}
         storageClassName: ""           
         accessModes: ["ReadWriteOnce"]
         resources:
@@ -390,6 +392,7 @@ statefulBackendServices:
     volumes:
       - path: /usr/share/opensearch/data
         claim: search-pvc
+        annotations: {}
         storageClassName: ""           
         accessModes: ["ReadWriteOnce"]
         resources:
@@ -416,6 +419,7 @@ statefulBackendServices:
     volumes:
       - path: /var/lib/mysql
         claim: database-data-pvc
+        annotations: {}
         storageClassName: ""           
         accessModes: ["ReadWriteOnce"]
         resources:
@@ -423,6 +427,7 @@ statefulBackendServices:
             storage: 5Gi
       - path: /var/log/mysql
         claim: database-logs-pvc
+        annotations: {}
         storageClassName: ""           
         accessModes: ["ReadWriteOnce"]
         resources:

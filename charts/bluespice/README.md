@@ -168,6 +168,8 @@ kubectl exec -n bluespice deployment/wiki-web -c wiki-web -- cat /data/initialAd
 | `wikiServicesVolume.wiki-pvc.storageClassName` | _(cluster default)_ | StorageClass for the wiki PVC |
 | `wikiServicesVolume.wiki-pvc.accessModes` | `["ReadWriteMany"]` | Use `["ReadWriteOnce"]` together with `wikiServicesCombineWebAndTask: true` if RWX is unavailable |
 | `wikiServicesVolume.wiki-pvc.resources.requests.storage` | `5Gi` | Wiki PVC size |
+| `wikiServicesVolume.wiki-pvc.annotations` | `{}` | Extra annotations for the wiki PVC |
+| `statefulBackendServices.<name>.volumes[].annotations` | `{}` | Extra annotations for stateful backend PVCs |
 | `wikiServicesCombineWebAndTask` | `false` | Run wiki-web and wiki-task in the same pod (required when using RWO storage) |
 
 ### Database
