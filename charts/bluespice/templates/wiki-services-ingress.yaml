@@ -1,4 +1,5 @@
 {{- if .Values.ingress.enabled }}
+{{- $basePath := default "/" .Values.wikiEnv.configEnv.WIKI_BASE_PATH | trimSuffix "/" }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -23,7 +24,7 @@ spec:
   - host: {{ $host }}
     http:
       paths:
-      - path: /
+      - path: {{ printf "%s/" $basePath }}
         pathType: Prefix
         backend:
           service:
@@ -31,7 +32,7 @@ spec:
             port:
               name: http
       {{- if .Values.statelessbackendServices.collabpads.enabled }}
-      - path: /_collabpads
+      - path: {{ printf "%s/_collabpads" $basePath }}
         pathType: Prefix
         backend:
           service:
@@ -40,7 +41,7 @@ spec:
               name: http
       {{- end }}
       {{- if .Values.statelessbackendServices.diagram.enabled }}
-      - path: /_diagram
+      - path: {{ printf "%s/_diagram" $basePath }}
         pathType: Prefix
         backend:
           service:
@@ -82,7 +83,7 @@ spec:
   - host: {{ $host }}
     http:
       paths:
-      - path: /_wire
+      - path: {{ printf "%s/_wire" $basePath }}
         pathType: Prefix
         backend:
           service:
