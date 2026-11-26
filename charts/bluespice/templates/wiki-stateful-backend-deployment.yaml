@@ -26,6 +26,10 @@ spec:
       - name: {{ $value.name }}
         image: {{ $value.image | quote }}
         imagePullPolicy: {{ default "IfNotPresent" $.Values.global.imagePullPolicy }}
+        {{- with $value.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         ports:
         - containerPort: {{ $value.targetPort }}
         {{- with $value.env }}
