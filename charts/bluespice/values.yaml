@@ -36,6 +36,21 @@ global:
     #my-custom-ca:
     #  mountPath: /etc/ssl/certs
 
+  # Map of containers to add to all pods. Useful for common credential
+  # initiation or other common setup; runs with possibly pod-local
+  # podSecurityContext (ref statefulBackend).  Map key is default name.
+  # Supports use of custom Helm templates, and values may be strings.
+  extraInitContainers:
+    # Example auth pre-config
+    #auth-setup:
+    #  image: busybox
+    #  command: [sh, -c]
+    #  args:
+    #  - wget -qO {{ .Values.authDest }} https://{{ .Values.authUrl }}
+    #  volumeMounts:
+    #  - mountPath: {{ .Values.authPath }}
+    #    name: {{ .Values.authVolume }}
+
 # AI service settings (future use)
 ai:
   enabled: false
@@ -112,6 +127,7 @@ wikiServices:
         subPath: wiki     # init-container writes into wiki/ subdirectory on the PVC
     extraVolumes: {} # merged with global.extraVolumes
     extraVolumeMounts: {} # merged with global.extraVolumeMounts
+    extraInitContainers: {} # merged with global.extraInitContainers
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -142,6 +158,7 @@ wikiServices:
         subPath: wiki
     extraVolumes: {} # merged with global.extraVolumes
     extraVolumeMounts: {} # merged with global.extraVolumeMounts
+    extraInitContainers: {} # merged with global.extraInitContainers
     nodeSelector: {}
     tolerations: []
     affinity: {}
@@ -224,6 +241,7 @@ statelessbackendServices:
       behavior: {}
     extraVolumes: {} # merged with global.extraVolumes
     extraVolumeMounts: {} # merged with global.extraVolumeMounts
+    extraInitContainers: {} # merged with global.extraInitContainers
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -251,6 +269,7 @@ statelessbackendServices:
       behavior: {}
     extraVolumes: {} # merged with global.extraVolumes
     extraVolumeMounts: {} # merged with global.extraVolumeMounts
+    extraInitContainers: {} # merged with global.extraInitContainers
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -278,6 +297,7 @@ statelessbackendServices:
       behavior: {}
     extraVolumes: {} # merged with global.extraVolumes
     extraVolumeMounts: {} # merged with global.extraVolumeMounts
+    extraInitContainers: {} # merged with global.extraInitContainers
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -293,6 +313,7 @@ statelessbackendServices:
     targetPort: 11211
     extraVolumes: {} # merged with global.extraVolumes
     extraVolumeMounts: {} # merged with global.extraVolumeMounts
+    extraInitContainers: {} # merged with global.extraInitContainers
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -308,6 +329,7 @@ statelessbackendServices:
     targetPort: 8080
     extraVolumes: {} # merged with global.extraVolumes
     extraVolumeMounts: {} # merged with global.extraVolumeMounts
+    extraInitContainers: {} # merged with global.extraInitContainers
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -350,6 +372,7 @@ statelessbackendServices:
             key: INTERNAL_WIKI_TOKEN_AUTH_SALT
     extraVolumes: {} # merged with global.extraVolumes
     extraVolumeMounts: {} # merged with global.extraVolumeMounts
+    extraInitContainers: {} # merged with global.extraInitContainers
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -367,6 +390,7 @@ statefulBackendServices:
     targetPort: 27017
     extraVolumes: {} # merged with global.extraVolumes
     extraVolumeMounts: {} # merged with global.extraVolumeMounts
+    extraInitContainers: {} # merged with global.extraInitContainers
     podSecurityContext: {}
     volumes:
       - path: /data/db
@@ -386,6 +410,7 @@ statefulBackendServices:
     targetPort: 9200    
     extraVolumes: {} # merged with global.extraVolumes
     extraVolumeMounts: {} # merged with global.extraVolumeMounts
+    extraInitContainers: {} # merged with global.extraInitContainers
     podSecurityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
@@ -407,6 +432,7 @@ statefulBackendServices:
     targetPort: 3306
     extraVolumes: {} # merged with global.extraVolumes
     extraVolumeMounts: {} # merged with global.extraVolumeMounts
+    extraInitContainers: {} # merged with global.extraInitContainers
     podSecurityContext: {}
     env:
       - name: MARIADB_DATABASE

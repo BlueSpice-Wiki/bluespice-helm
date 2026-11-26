@@ -46,6 +46,15 @@ spec:
       initContainers:
       {{- $backendRepo := default "docker.bluespice.com/bluespice" $.Values.global.image.backendrepo }}
       {{- $backendTag := default $.Chart.AppVersion $.Values.global.image.backendTag }}
+      {{- $initContainers := list }}
+      {{- if $combineWebTask }}
+        {{- $initContainers = include "bluespice.extraInitContainers" (list $ $wikiTask) | fromYamlArray }}
+      {{- else }}
+        {{- $initContainers = include "bluespice.extraInitContainers" (list $ $value) | fromYamlArray }}
+      {{- end }}
+      {{- with $initContainers }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- if or $combineWebTask (eq $key "wiki-task") }}
         - name: prepare-bluespice
           image: {{ printf "%s/helper:%s" $backendRepo $backendTag }}
