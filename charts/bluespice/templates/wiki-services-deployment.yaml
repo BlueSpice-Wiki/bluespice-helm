@@ -70,8 +70,32 @@ spec:
       {{- end }}
       {{- if $statefulDbEnabled }}
         - name: wait-for-db
-          image: busybox
-          command: ['sh', '-c', 'until nc -z {{ default "database" $.Values.statefulBackendServices.database.name }} {{ default 3306 $.Values.statefulBackendServices.database.port }}; do echo waiting for database; sleep 5; done;']
+          image: {{ printf "%s/helper:%s" $backendRepo $backendTag }}
+          imagePullPolicy: {{ default "IfNotPresent" $.Values.global.imagePullPolicy }}
+          {{- $dbName := default "database" $.Values.statefulBackendServices.database.name }}
+          {{- $dbPort := default 3306 $.Values.statefulBackendServices.database.port }}
+          command:
+          - sh
+          - -c
+          - |
+            until nc -z {{ $dbName }} {{ $dbPort }}; do
+              echo waiting for database; sleep 5
+            done
+            until MYSQL_PWD=$DB_PASS mariadb -h {{ $dbName }} --connect-timeout 2 -P {{ $dbPort }} --skip-ssl -u "$DB_USER" -ANse "select 'user authenticated'" "$DB_NAME"; do
+              echo "waiting for $DB_USER access"; sleep 5
+            done
+          envFrom:
+          - configMapRef:
+              name: {{ include "bluespice.fullname" $ }}-wiki-config
+          {{- if $.Values.wikiEnv.extraEnvFrom }}
+          {{- toYaml $.Values.wikiEnv.extraEnvFrom | nindent 10 }}
+          {{- end }}
+          env:
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: bluespice-database-secrets
+                key: MARIADB_PASSWORD
       {{- end }}
       containers:
       - name: {{ $value.name }}
