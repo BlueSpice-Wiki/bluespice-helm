@@ -49,6 +49,7 @@ ingress:
     name: wiki-web
     tlsSecret: wiki-ingress-cert
     ingressClassName: ""
+    extraDomains: []
 
 # Optional frontend cache (Varnish). When enabled, ingress path / targets this
 # service instead of ingress.name, and it forwards to backendHost:backendPort.
